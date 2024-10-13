@@ -1,0 +1,1370 @@
+when the session affinity use in service  how  the service will assign the  replica to users differenty  
+what is the mechanishm the service is used to route the different pod replica to different user  how to do bye the service
+
+When a service in Kubernetes uses session affinity, it ensures that a client (user) is always routed to the same replica (pod) during the lifetime of their session. 
+This mechanism is particularly useful for stateful applications or cases where a user’s state must be maintained across multiple requests. 
+The default mechanism Kubernetes uses to achieve this is Client IP-based session affinity.
+
+
+Here’s how the mechanism works:
+
+
+1. Client IP-based Session Affinity (Service Type: ClusterIP, NodePort, or LoadBalancer)
+When a Kubernetes service is configured with session affinity, it directs incoming requests from a client to the same pod (replica) based on the client’s IP address. 
+This is done using a session affinity policy called sessionAffinity: ClientIP.
+
+ClientIP Mechanism: Kubernetes keeps track of the client’s IP address and maps it to a specific pod replica.
+The mapping is stored in the service’s load balancer configuration for a specific duration, which is controlled by the sessionAffinityConfig.clientIP.timeoutSeconds value.
+
+Example of Session Affinity Config:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: my-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800   # Session affinity will persist for 3 hours
+
+
+-----------------------------------------------
+
+
+2. Load Balancing to Different Pods
+When session affinity is enabled, the first time a user sends a request to the service, it goes through the default round-robin load balancing (or other available strategies). 
+This process assigns the user to one of the pods serving that service. 
+Once the user has been assigned a pod, the service records the user's client IP address and ensures that subsequent requests from that user go to the same pod during the session affinity timeout.
+
+3. Timeout Mechanism
+The timeout for session affinity is defined in sessionAffinityConfig.clientIP.timeoutSeconds, and once this period expires, the user's session ends. 
+The next time they send a request, a new pod might be selected based on the service's default load balancing algorithm.
+
+----------------------------
+
+Handling Session Expiry: If the client does not make a request within the session timeout, the affinity record is cleared, and the next request will be routed as if it’s from a new client.
+
+4. How the Service Assigns Pods Differently to Users
+First Request (Load Balancing): The Kubernetes service, which acts as a load balancer, distributes incoming requests among all available pod replicas. 
+It uses either round-robin or another load balancing algorithm to assign a user to a specific pod.
+
+
+Subsequent Requests (Session Affinity): Once session affinity is established for a user, the service ensures that all subsequent requests from that 
+user's IP address are routed to the same pod until the session expires.
+
+5. Load Balancer Strategies
+Kubernetes uses different strategies for load balancing incoming requests to service pods:
+
+Round-Robin: Requests are distributed evenly among all pods.
+Random: Requests are routed randomly to different pods.
+Least Connections: Pods with the fewest active connections are preferred.
+For each new user (based on their client IP), one of these strategies will select a pod. Once a pod is assigned to a user, session affinity maintains the user-pod binding.
+
+6. Advanced Usage: Sticky Sessions in Ingress Controllers
+If you're using an ingress controller (like NGINX or HAProxy), they also support sticky sessions for managing session affinity at the HTTP level (Layer 7). 
+The ingress controller can use cookies or other methods to ensure session stickiness.
+
+----------------------------------------------------------------------
+
+
+Example with NGINX Ingress:
+
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: "my-session"
+    nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
+spec:
+  rules:
+  - host: myapp.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-service
+            port:
+              number: 80
+
+
+-----------------------------------
+
+Summary
+Kubernetes services with session affinity route requests based on the Client IP.
+On the first request, the service assigns a pod based on a load balancing algorithm, and then it binds that user to the same pod during the session.
+Timeout controls when the session expires, and a new pod will be assigned after that period.
+For more advanced routing, ingress controllers can handle sticky sessions at the HTTP level.
+This setup ensures consistent user experience across multiple requests and maintains stateful interactions with specific pods.
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+==> ok now i will give you the yaml files of the deployment and the service give me the   To reset the replicas at the end of a session,
+    ensuring that the replica is "new" or reset for the next user, you can take the following approach in Kubernetes. 
+    This will involve terminating or reinitializing the pods once the session ends, which clears the state and resets the environment.
+
+Steps to Reset Replicas After Session Timeout                                                                                    
+Approach: Use Deployment with TerminationGracePeriodSeconds
+Set up your deployment so that each pod has a short lifecycle and is terminated after the session ends.
+Use terminationGracePeriodSeconds to allow the pod to gracefully handle any session cleanup.     
+
+
+
+==>  i will give you the yaml files make changes in that                                                             
+root@controlplane:~# ls
+deploy.yaml  get-docker.sh  snap  svc.yaml
+
+root@controlplane:~# cat deploy.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+
+----------------------------------------------------
+
+root@controlplane:~# cat svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001  # Adjust if necessary
+  type: NodePort
+  sessionAffinity: ClientIP   # Enables session stickiness based on user IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800   # Session timeout (in seconds), adjust as needed
+
+-------------------------------------------------------------------------------
+
+To reset the replicas at the end of a session and ensure that each replica is "fresh" for the next user,
+you can modify the Deployment YAML to automatically terminate and recreate pods after the session timeout. 
+Here's how you can apply the terminationGracePeriodSeconds and other related mechanisms:
+
+
+Set terminationGracePeriodSeconds: This ensures that the pod is given time to gracefully shut down before it is terminated.
+This grace period will allow for proper session cleanup.
+
+Lifecycle Management: Optionally, you can add a lifecycle hook to perform actions before termination (like flushing the session state).
+
+Automate Pod Deletion/Restart: You can use kubectl or an automated method (like a cron job or monitoring solution) to restart the pods after the session timeout.
+
+Here’s the modified deploy.yaml and svc.yaml to incorporate these ideas:
+
+deploy.yaml (Modified)
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      terminationGracePeriodSeconds: 30   # 30 seconds to allow for graceful termination
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "echo 'Session cleanup'; sleep 5"] 
+              # Optional: Add session cleanup command to remove state/data (flush cache, DB cleanup, etc.)
+
+
+---------------------------------------------------------------------------------------------------------------
+
+terminationGracePeriodSeconds: 30: This provides a grace period for each pod to terminate gracefully, allowing any cleanup actions to be performed (like flushing session data).
+Lifecycle Hook (preStop): Before the pod is terminated, this hook executes the specified command (e.g., session cleanup). You can extend this to handle specific application logic.
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001  # Adjust if necessary
+  type: NodePort
+  sessionAffinity: ClientIP   # Enables session stickiness based on user IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800   # Session timeout (in seconds), adjust as needed
+
+-------------------------------------------------------------------------------------
+
+Optional Enhancements:
+Cron Job for Automated Reset: You can set up a Kubernetes CronJob to delete and recreate pods periodically (or after a specific duration) to ensure fresh replicas for the next user session.
+
+Example of CronJob:
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reset-php-demo-replicas
+spec:
+  schedule: "0 */3 * * *"  # Every 3 hours
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            command: ["kubectl", "delete", "pods", "--selector=app=php-demo"]
+          restartPolicy: OnFailure
+
+
+------------------------------------
+
+Configure Horizontal Pod Autoscaler (HPA): You can combine the above approach with HPA to automatically scale the number of replicas based on CPU/memory usage, ensuring enough resources during high loads.
+
+By terminating the pods after a session timeout and restarting them fresh, you can ensure that users always access "new" replicas for their sessions,
+thereby resetting any state associated with the previous session.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+can you explain me this deployment yaml file how does it happens when the service session timeout is over how the deployment file will will work then 
+
+Let me explain the behavior of the deployment and service YAML files after a session timeout.
+
+Key Components in Your Deployment (deploy.yaml):
+replicas: 5: Specifies that five pods (replicas) of your php-demo application should be running at all times.
+
+terminationGracePeriodSeconds: 30: This ensures that when a pod is terminated (e.g., after a session timeout),
+it has 30 seconds to gracefully shut down.
+
+During this grace period, the pod can perform cleanup operations such as clearing session data or closing database connections.
+
+lifecycle section (specifically preStop): This allows the container to execute a command right before termination.
+In your case, it’s set to echo "Session cleanup" and sleep for 5 seconds, simulating session data cleanup.
+
+Key Components in Your Service (svc.yaml):
+
+sessionAffinity: ClientIP: Ensures that requests from the same client IP address will be routed to the same pod for the duration of the session.
+This enables session stickiness, meaning the user connects to one specific replica (pod) during their session.
+
+sessionAffinityConfig.clientIP.timeoutSeconds: 10800: This sets the session timeout to 3 hours (10800 seconds). 
+After this period, the user's session will expire, and their future requests could be routed to a new pod, unless session stickiness is maintained by a new session.
+
+How It Works When the Session Timeout is Over:
+Session Timeout Behavior: When a user’s session expires (after timeoutSeconds set in the service), any new requests from the user could potentially be routed to a different replica (pod) 
+based on the new session’s assignment. The service will no longer enforce session affinity for that user’s requests.
+
+Service Role: Once the session expires, the Kubernetes service can redirect the user to any available pod (based on round-robin or another load balancing algorithm). 
+The pod the user was previously connected to remains active for other users unless it's manually restarted or scaled down.
+
+Deployment and Pod Lifecycle:
+
+Pods will keep running based on the replicas: 5 configuration.
+If you want to reset each pod after a session ends (i.e., give the user a "new" or reset environment after their session times out), you will need to periodically restart the pods.
+
+
+Resetting Pods:
+
+Termination Grace Period: When a pod is restarted or terminated (perhaps by a cron job or manual action), Kubernetes gives the pod 30 seconds (as per terminationGracePeriodSeconds) to gracefully shut down and clean up.
+New Pods After Reset: When new pods are created, they will be in a "clean" state with no lingering session data from the previous users. 
+This ensures that each user’s session is isolated, and any changes made during their session are discarded after the pod is reset.
+
+
+Pod Reset after Session:
+
+After a session timeout, the service doesn’t automatically reset the pod.
+To ensure that pods are reset and present a clean environment for the next user, you might need to automate pod restarts at regular intervals using tools
+like a CronJob or monitoring solution to terminate pods and trigger fresh ones.
+
+
+Example Reset Process:
+The user connects to the application and is routed to a specific pod using session affinity.
+During the session, the user interacts with the pod and possibly modifies some data.
+Once the session timeout is over (after 10800 seconds in your configuration), the session ends, and the user's next request may be directed to a new pod.
+If you want the old pod to be reset for the next user, the pod should be terminated or restarted. This can be done manually or through automation.
+A new, clean pod will be created by Kubernetes (because of the replicas: 5 setting), ensuring the user gets a fresh environment on their next connection.
+
+
+Ensuring Replica Reset After Session:
+
+To achieve automatic pod resets after session timeouts:
+
+Cron Job: Schedule a CronJob to periodically terminate the pods and recreate them. This would ensure that pods are reset at regular intervals.
+
+Graceful Shutdown (terminationGracePeriodSeconds): This ensures pods get sufficient time to clean up session data or state before they are terminated and restarted.
+
+Summary:
+Session affinity keeps users connected to the same pod during their session.
+When the session timeout is over, new requests can be directed to another pod.
+Pod resets (through termination and recreation) ensure that any changes made during the session are discarded, providing a clean environment for new sessions.
+Automating Pod Resets: Use CronJobs or other automation techniques to terminate pods after session timeouts, ensuring clean environments for each session.
+
+======================================================================================================================
+
+
+==>  i dont want to user conjob to cleanup is the  terminationGracePeriodSeconds sufficient to do this in deployment file to clean up pod after the session is over 
+
+ChatGPT
+The terminationGracePeriodSeconds alone is not enough to ensure a full reset of the pod when a session timeout occurs because it only ensures that the pod shuts down gracefully.
+Here's why:
+
+
+1. What terminationGracePeriodSeconds Does:
+Graceful Shutdown: It allows the pod to have a certain amount of time (in your case, 30 seconds) to handle any cleanup tasks before being forcefully terminated. For example, closing database connections or writing final logs.
+Pod Termination: The pod will still need to be explicitly terminated by some mechanism (manual, triggered by scaling down, or another external event like a failure or CronJob).
+
+
+2. What It Doesn't Do:
+Automatic Reset at Session Timeout: terminationGracePeriodSeconds is not directly tied to session timeouts. 
+It does not trigger on its own when a session ends. 
+It only kicks in when the pod is being terminated (like during a kubectl delete pod or if the pod is replaced due to deployment changes).
+To achieve a complete reset of the pod environment after a session ends (without using CronJob), you need a mechanism to ensure that pods are terminated when the session is over.
+
+3. Alternative Without CronJob:
+You can use session management within your application to notify Kubernetes to terminate the pod after the session ends. For example:
+
+4. Custom Code: You could add logic in your application that, once a session ends, it sends a signal to Kubernetes (via its API) to terminate the pod. 
+   This way, Kubernetes will terminate the pod, triggering the cleanup via terminationGracePeriodSeconds.
+
+5. Sidecar Container: Use a sidecar container in the pod to monitor session activity. Once the session timeout occurs, the sidecar can initiate the pod termination.
+
+Summary:
+terminationGracePeriodSeconds handles graceful termination of pods, not automatic session resets.
+To reset the pods after session timeouts, you need an additional mechanism (such as custom session management logic in your application) to terminate pods after the session ends.
+
+--------------------------------------------------------------------------------------------------------------
+
+You said:
+ok then can you give me yaml files for this 
+
+==>  Here’s an approach to reset the replica pods after session timeout using a sidecar container to monitor session activity. 
+    The sidecar container can handle termination once the session is over.
+
+Below are the updated YAML files for both Deployment and Service, using the sidecar pattern. 
+The sidecar container monitors sessions and can notify Kubernetes to terminate the pod.
+
+1. Updated Deployment YAML:
+This deployment includes a sidecar container to monitor session activities and trigger termination when the session ends.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+      - name: session-monitor
+        image: busybox  # Example sidecar for monitoring session activity
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Monitor session and terminate pod when session ends
+          while true; do
+            # Custom logic to check session expiration
+            if [ "$(curl -s http://localhost/session_status)" = "expired" ]; then
+              echo "Session expired, terminating pod."
+              # Trigger Kubernetes pod termination
+              curl -X DELETE http://localhost:8080/pod/self  # Example endpoint for termination
+            fi
+            sleep 10
+          done
+      terminationGracePeriodSeconds: 30  # Graceful termination period
+
+
+------------------------------------------------------------------------------------------
+
+
+Explanation:
+1. Sidecar Container (session-monitor): This container runs alongside the main application container. It continuously checks the session status. 
+If the session is expired, it can trigger pod termination.
+You would need to replace curl -X DELETE http://localhost:8080/pod/self with logic that can notify Kubernetes (via API or another method) to terminate the pod when the session ends.
+terminationGracePeriodSeconds: Ensures the pod shuts down gracefully, allowing your main container to complete its cleanup tasks before termination.
+2. Updated Service YAML:
+The service configuration remains the same. The important part is session affinity to make sure the user remains connected to the same pod until their session expires.
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001  # Adjust if necessary
+  type: NodePort
+  sessionAffinity: ClientIP   # Enables session stickiness based on user IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800   # Session timeout (in seconds), adjust as needed
+
+
+-------------------------------------------------------------------------------------
+
+Key Points:
+sessionAffinity: The service ensures that the user stays connected to the same replica during their session based on their IP address.
+Sidecar Logic: The sidecar (session-monitor) is responsible for monitoring session expiration and triggering the pod reset.
+Pod Termination: Once the pod is terminated, a new pod will be created by the deployment, providing a "fresh" replica for the next user.
+With this configuration, the replica pod will reset and terminate when the session expires, ensuring the environment is reset for the next user.
+
+
+=========================================================================================================
+
+or if i used cornjob with  terminationGracePeriodSeconds handles graceful termination of pods how will be the yaml files are and how it will works
+
+==>
+Here’s how you can integrate a CronJob with terminationGracePeriodSeconds to handle the resetting of pods gracefully. 
+The CronJob will schedule the termination and recreation of pods at specific intervals (like after session timeout), 
+while terminationGracePeriodSeconds ensures that pods shut down gracefully.
+
+
+1. Deployment YAML with terminationGracePeriodSeconds
+This configuration ensures that when the pods are terminated (manually or by the CronJob), they will gracefully complete their tasks before shutting down.
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+      terminationGracePeriodSeconds: 30  # Grace period to allow graceful shutdown
+
+
+---------------------------------------------------------------------------------
+
+Explanation:
+terminationGracePeriodSeconds: Ensures that the pod has 30 seconds to shut down gracefully, allowing the container to finish any cleanup operations before it is terminated.
+
+2. CronJob YAML to Periodically Terminate Pods
+The CronJob will periodically delete pods, which causes Kubernetes to automatically recreate them (since the Deployment is set to 5 replicas).
+
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pod-reset-job
+spec:
+  schedule: "0 */3 * * *"  # Every 3 hours (adjust this as needed)
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: pod-terminator
+            image: bitnami/kubectl:latest  # Container with kubectl to delete pods
+            command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Deleting pods to reset them..."
+              kubectl delete pods -l app=php-demo  # Delete pods by label
+          restartPolicy: OnFailure
+
+
+-------------------------------------------------------------------------------------------------------
+
+
+Explanation:
+CronJob:
+schedule: Runs the job every 3 hours (adjust this based on your session timeout).
+kubectl delete pods: Deletes all pods with the label app=php-demo. Since the deployment manages the replicas, Kubernetes will automatically create new pods once the old ones are deleted.
+How This Works:
+Session Stickiness (via Service): As the user connects, they will stay with the same pod using session affinity.
+Graceful Shutdown: Once the session ends or the CronJob triggers, Kubernetes will terminate the pod gracefully, allowing any cleanup or session closure (using terminationGracePeriodSeconds).
+Pod Reset: The CronJob triggers pod termination by deleting them. Once deleted, new pods are recreated by the deployment to handle new sessions.
+Fresh Replica for New Users: When a user reconnects after the CronJob run, they will interact with a fresh pod, ensuring no residual state from previous users.
+
+
+
+Service Yaml 
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001
+  type: NodePort
+  sessionAffinity: ClientIP  # Ensures session stickiness based on user IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800   # Session timeout in seconds
+
+----------------------------------------------------------------------
+
+Summary:
+The CronJob periodically terminates the pods based on a schedule, ensuring that each pod is refreshed after a specific period.
+terminationGracePeriodSeconds ensures that the pods gracefully complete ongoing tasks before termination.
+New pods are created by Kubernetes automatically via the Deployment after old ones are terminated.
+This way, you get fresh replicas for each new user session, and the service ensures users stay connected to the same replica during their session.
+
+
+------------------------------------------------------------------------------------------------------------------------
+============================================================================================================================
+
+but in the deployment there is the 5 replicas are their and then suppose when the users are interact with the  each replica their time of session will different like user a will connect to replica 1 then their session will start but other user b will connect to replica 3 in different time then their session will start so when the coronjob will execute then that reset has to be apply first on the replica one becasue its session starts first then after some time when the replica 3 session will over then that replica has to be reset  how it will happen
+
+==> 
+In the situation where users connect to replicas at different times and have varying session durations, the typical CronJob-based pod reset mechanism won’t address the individual timing of when each user's session ends.
+To handle this more dynamically, the approach needs to allow each pod to reset individually based on user interaction and session completion, rather than resetting all replicas simultaneously.
+
+To achieve this, here are two options that can better handle session-based pod resets:
+
+1. Using Pod Lifecycle and Probes for Dynamic Reset
+Instead of relying on a global reset via CronJob, you can use probes (such as liveness probes) and an application-level timeout mechanism to terminate each pod when its specific session ends.
+Here's how it could work:
+
+Session Timeout Detection: Implement logic in your application container that detects when a user’s session is complete (e.g., no activity for a specified duration).
+Pod Termination: Once a session is considered over, the application can either:
+Exit gracefully, which will terminate the pod, or
+Use an API call (kubectl) within the pod to terminate itself (this would trigger Kubernetes to create a fresh replica).
+
+YAML Update (only Deployment changes):
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+        livenessProbe:   # Liveness probe to terminate pod if unresponsive
+          httpGet:
+            path: /health  # Assuming the application has a /health endpoint
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      terminationGracePeriodSeconds: 30  # Allow graceful cleanup when terminating
+
+
+------------------------------------------------------------------------------------------
+
+Explanation:
+Liveness Probe: A livenessProbe periodically checks the health of the pod (like responding to a /health endpoint).
+If the pod doesn’t respond (indicating that a session has completed and the application is no longer active),
+the pod will be terminated and a new one will be created.
+
+Termination Grace: Pods will have 30 seconds to gracefully shut down, ensuring any remaining tasks are completed before termination.
+
+Application Logic:
+Each user session will be tracked within the container (e.g., using an application-level session timeout).
+Once the session ends (no user activity), the application can either exit the process (causing the pod to terminate) or stop responding to the liveness probe.
+Kubernetes will detect the failure (via the liveness probe) and terminate the pod, automatically creating a fresh one.
+
+2. Graceful Pod Termination with CronJob for Cleanup
+If you still want to use a CronJob to manage periodic cleanup, but need more control over when individual pods are reset based on their session activity, 
+you can integrate the CronJob with logic that checks the age of pods or their session activity.
+
+CronJob Example:
+
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pod-reset-job
+spec:
+  schedule: "*/10 * * * *"  # Runs every 10 minutes, adjust as necessary
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: pod-cleanup
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Checking for old pods..."
+              # Check pods that are older than the session timeout (e.g., 30 minutes)
+              kubectl get pods -l app=php-demo --sort-by=.metadata.creationTimestamp \
+              | while read -r pod; do
+                  # Add custom logic here to decide if a pod needs resetting
+                  echo "Deleting $pod to reset session..."
+                  kubectl delete pod $pod;
+                done
+          restartPolicy: OnFailure
+
+
+------------------------------------------------------------------------------------------
+
+
+Explanation:
+The CronJob periodically runs a pod-cleanup job.
+The script inside the CronJob checks the age of each pod and deletes it if it exceeds a certain session timeout threshold.
+This way, you retain periodic resets, but the resets are handled individually per pod based on their creation time or session activity.
+
+How It Works:
+Per-Session Timeouts: Each pod handles the user's session individually. Once the session ends, either via liveness probe or termination by the application, the pod is deleted.
+Automated Fresh Start: When a pod is terminated, Kubernetes automatically creates a new pod to replace it, ensuring new users always get a fresh replica.
+CronJob for Cleanup: If necessary, a CronJob can still be used to periodically ensure that all stale pods are terminated and replaced.
+Summary:
+Dynamic Pod Reset via Liveness Probe: Pods reset individually based on session activity or unresponsiveness, automatically ensuring fresh instances.
+CronJob (Optional): Can still be used for cleanup, but in a way that targets individual pods rather than all pods at once.
+By combining these strategies, you can ensure that each user's session operates independently, with pods being reset as needed, either automatically by the application or by a periodic cleanup job.
+
+
+===================================================================================================================
+
+* if i use liveness probe how it will know that the after the session over for the perticular replica
+==>
+The liveness probe in Kubernetes itself doesn't directly track user sessions or know when a session has ended. 
+It's a mechanism to check the health of a container by periodically probing (e.g., HTTP request, TCP connection, or checking the process state). 
+However, to ensure that a liveness probe can terminate the replica (pod) after the user session ends, you would need to implement custom logic inside the application.
+
+Here’s how you can approach this:
+
+1. Application-Managed Session State:
+The application would track the session time for each user. Once the session ends (due to a timeout or inactivity), the application should either:
+
+Stop responding to the liveness probe (which would make the liveness probe fail and terminate the pod), or
+Gracefully shut down the application process, triggering the pod termination.
+For example, if your PHP application has a session timeout mechanism, once the session expires, you can stop serving HTTP requests or serve an error/timeout message on a specific health check endpoint. 
+This would cause the liveness probe to fail, and Kubernetes would restart the pod.
+
+2. Using the Liveness Probe:
+The liveness probe would periodically check the application’s health or readiness (such as checking an endpoint like /health or /ready). 
+The application could return a failure response when the session has expired, causing Kubernetes to terminate the pod.
+
+Here’s a possible configuration with a liveness probe that checks the /health endpoint:
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      terminationGracePeriodSeconds: 30
+
+
+-----------------------------------------------------------------------
+
+In this setup:
+
+The liveness probe checks the /health endpoint.
+Once the session is over, the application should either stop serving requests or return an error on /health. This would cause the liveness probe to fail,
+and Kubernetes will terminate the pod.
+
+3. Session Timeout Handling in the Application:
+The actual logic for managing session timeouts would need to be handled inside the application:
+
+PHP Session Handling: In PHP, you can manage sessions using session_start() and configure a timeout using ini_set('session.gc_maxlifetime', <timeout_in_seconds>);.
+When the session expires, you can make the /health endpoint return an error code or shut down the server process.
+For example:
+
+Php Code
+
+<?php
+session_start();
+$timeout = 3600; // Set session timeout to 1 hour
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $timeout)) {
+    session_unset();   // Unset session variables
+    session_destroy(); // Destroy session
+    header("HTTP/1.1 500 Session Timeout"); // Make liveness probe fail
+}
+$_SESSION['LAST_ACTIVITY'] = time(); // Update session activity
+?>
+
+
+------------------------------------------------------------------------------------------------
+
+4. Impact on the Pod:
+Once the liveness probe detects the application is no longer healthy (due to session expiry or inactivity), Kubernetes will:
+
+Mark the pod as unhealthy.
+Terminate the pod.
+Create a new pod to replace the terminated one, giving the user a fresh environment for their next session.
+How This Works in Practice:
+The application keeps track of user session times and can detect when the session expires.
+Once a session expires, the application either stops serving requests or explicitly signals that it's unhealthy
+(e.g., by making the health endpoint return a failure).
+The liveness probe detects this, causing Kubernetes to terminate the pod.
+Kubernetes then automatically creates a new replica (pod) as defined in the Deployment, giving future users a clean environment.
+By combining liveness probes and custom session handling logic, you can achieve the behavior where each user gets a "reset" pod after their session ends.
+
+
+----------------------------------------------------------------------------------------
+===========================================================================================================
+
+** where to use this script for session handleing 
+==> 
+The script for session handling should be placed in your PHP application's codebase, where you manage user sessions. 
+This would typically be in files where you handle user authentication, login, or general session management logic.
+
+Here's how you can integrate it:
+
+Steps to Implement in Your PHP Application:
+Session Initialization: Ensure that you start a session on every page or service that a user interacts with by using session_start(); at the top of your PHP files.
+
+Custom Session Timeout Logic: In any file where you handle sessions (like login scripts, or where user data is stored during a session), 
+you can use the provided script to manage session timeouts. You should place it in a commonly included or accessed script (e.g., a header file that is included across multiple pages).
+
+Example:
+
+If you have a main file, say session_handler.php, which is included in all your PHP pages, this is where you'd put the session timeout logic.
+php
+Copy code
+<?php
+session_start(); // Initialize session
+
+$timeout = 3600; // 1 hour session timeout
+
+// Check for session activity
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $timeout)) {
+    session_unset();    // Unset all session variables
+    session_destroy();  // Destroy the session
+    
+    // Return error to liveness probe or redirect to session timeout page
+    header("HTTP/1.1 500 Session Timeout"); 
+    exit; // Prevent further execution
+}
+$_SESSION['LAST_ACTIVITY'] = time(); // Update activity timestamp
+?>
+
+-------------------------------------------------------------------
+
+Health Endpoint: If you have a /health endpoint for Kubernetes' liveness probe, integrate session checking logic there. 
+The probe should return a 500 Internal Server Error when the session has expired, signaling Kubernetes that the pod is unhealthy and should be restarted.
+
+Usage in Other Pages: Include this session management script in all relevant pages of your application.
+This will ensure the session is checked and managed wherever the user is interacting with the app.
+
+Example: In a Page
+php
+
+<?php
+include 'session_handler.php'; // Include the session handling script
+
+// Rest of the page code
+?>
+
+By placing this script at the start of every page or in a common included file (like a header),
+you can ensure that session handling is consistent across your application,
+and the liveness probe will detect when a session has expired, allowing Kubernetes to reset the pods as needed.
+
+
+==============================================================================================================================================
+
+**  if i go with the conjob option for the trigger the session timeout  replica reset how it would be done explain with yaml files 
+==> 
+To implement session timeout handling and pod reset using CronJob in Kubernetes, you can schedule a job that monitors session timeouts and resets replicas 
+(i.e., terminates pods). Here's how this would be done:
+
+Overview
+The CronJob will run periodically, check for session timeouts, and delete pods with expired sessions.
+Kubernetes' ReplicaSet will ensure new pods are spun up after the job deletes them, effectively "resetting" the replicas.
+YAML Files
+
+
+1. Deployment YAML (with Replicas)
+This will define the deployment of your application with multiple replicas.
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+
+----------------------------------------------------
+
+2. Service YAML (with session affinity)
+This service uses session affinity to ensure users are routed to the same replica during a session
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001
+  type: NodePort
+  sessionAffinity: ClientIP  # Ensures session stickiness based on client IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600  # 1-hour session timeout
+
+
+----------------------------------------------------------------------------------
+
+3. CronJob YAML (to check and reset expired sessions)
+This CronJob will run periodically and delete the pods that have expired sessions.
+
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: session-reset-job
+spec:
+  schedule: "*/5 * * * *"  # Runs every 5 minutes, adjust as needed
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: session-reset
+            image: busybox:1.28
+            command:
+            - /bin/sh
+            - -c
+            - |
+              # Iterate over all pods in the deployment
+              for pod in $(kubectl get pods -l app=php-demo -o name); do
+                # Check session status by calling your app's /health endpoint
+                session_status=$(curl -s http://$pod:80/health)
+                if [ "$session_status" != "healthy" ]; then
+                  # Delete the pod to reset it
+                  kubectl delete $pod
+                fi
+              done
+          restartPolicy: OnFailure
+
+
+-----------------------------------------------------------------------
+
+
+How It Works
+CronJob:
+
+Runs periodically (every 5 minutes in this example) and checks the health of each pod.
+It queries the /health endpoint of each pod. This endpoint should return a response that includes the session status. 
+If the session has expired, the health check should return an error (like 500).
+If a pod is unhealthy or has expired sessions, the job will delete the pod.
+Once the pod is deleted, the ReplicaSet automatically creates a new pod, thus "resetting" the replica.
+Service:
+
+The service routes users to the same pod during a session due to session affinity (based on client IP).
+The timeout is set for 1 hour (timeoutSeconds: 3600), after which the service will direct users to a new pod on their next request.
+Deployment:
+
+The deployment creates 5 replicas, ensuring high availability.
+The liveness and readiness probes continuously check the health of the pods. If a pod is unhealthy for reasons other than session expiry, 
+Kubernetes will restart it.
+
+Considerations
+Session Management in Application: Your application should manage session state and expose this information on the /health endpoint.
+Session Duration: Adjust the timeoutSeconds in the service configuration and the schedule in the CronJob as per your application's session duration needs.
+Liveness Probe: You can use this in addition to the CronJob to handle pods that become unhealthy for reasons other than session expiry.
+This approach ensures that the replicas are reset when the session ends, providing a fresh state for new users without requiring a custom script within your application.
+
+
+=====================================================================
+
+**in this the probes are sufficient to  implement this do i need of terminationGracePeriodSeconds) this in deployment file or the probes are sufficient to implement the timeout session reset using cronjob
+==>
+The liveness and readiness probes are sufficient to monitor the health of the pods and reset them when they become unhealthy or expire, based on the session logic.
+You do not necessarily need to include terminationGracePeriodSeconds for the sole purpose of resetting the pods after the session ends.
+
+However, terminationGracePeriodSeconds can be helpful in cases where you want to:
+
+Gracefully terminate the pod, allowing it some time to clean up resources, log out users, or save data before shutting down.
+Ensure smooth shutdown of processes before the pod is destroyed.
+When to Use terminationGracePeriodSeconds
+If your application needs to handle ongoing requests, clean up resources, or perform any custom logic before the pod is deleted,
+you might consider adding this to your Deployment. This allows the pod to complete current requests during the shutdown before Kubernetes terminates it completely.
+
+For example:
+
+yaml
+spec:
+  terminationGracePeriodSeconds: 30
+
+This allows the pod 30 seconds to gracefully terminate before being forcefully killed.
+It can be useful if the session timeout involves completing tasks or cleaning up data.
+
+Using Probes and CronJob:
+The probes are enough to reset pods that have expired or unhealthy sessions.
+The CronJob runs periodically, checking the session status and deleting pods if needed, without requiring terminationGracePeriodSeconds unless graceful termination is explicitly needed.
+
+Conclusion:
+If you don't need graceful termination (for handling ongoing requests or cleaning up), the probes and CronJob are sufficient to handle session reset.
+If graceful termination is necessary, you can add terminationGracePeriodSeconds for controlled shutdown.
+
+======================================================================
+
+** how will the probes will know that the replica is unhealthy after the session is over 
+
+To make the probes aware that a replica (pod) has become unhealthy due to a session timeout, you will need to define custom liveness and readiness probes
+that can detect the status of the session in the application. Here’s how this can be done:
+
+1. Custom Logic in the Application:
+The application must expose an endpoint (such as an HTTP status page or custom logic) that can indicate whether a session is active or has expired. 
+For example:
+
+If the session is still valid, the endpoint could return a 200 HTTP status code.
+If the session has expired, the endpoint could return a 500 or 503 HTTP status code, signaling the pod is unhealthy.
+You can also track session timeouts via a file, log, or database and use that to determine the state of the session for that particular replica.
+
+2. Liveness and Readiness Probes Configurations:
+The probes will periodically check this endpoint or logic to determine if the pod is healthy or needs to be reset. 
+If the session is expired (detected as unhealthy),
+the liveness probe can trigger a restart of the pod.
+
+Example of a Deployment with Probes:
+
+Deployment YAML File:
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /healthz   # Custom health endpoint that checks session status
+            port: 80
+          initialDelaySeconds: 30  # Time to wait before starting probe
+          periodSeconds: 10        # Frequency of probe checks
+          failureThreshold: 3      # Number of failures before pod is considered unhealthy
+        readinessProbe:
+          httpGet:
+            path: /readyz   # Custom readiness endpoint to check if pod is ready for traffic
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+
+-----------------------------------------------------------
+
+3. How It Works:
+Liveness Probe: This checks the health of the pod periodically. If the session has expired (indicating that the replica is no longer valid),
+the application returns an unhealthy response, triggering Kubernetes to restart the pod.
+This effectively resets the session and starts the replica fresh.
+
+Readiness Probe: This ensures that the pod is only marked as "ready" to accept traffic if the session is valid and active. 
+If the session is expired, the pod is temporarily removed from the service's load balancer.
+
+4. CronJob for Additional Monitoring:
+If you need a CronJob to run periodically and clean up old sessions (e.g., to reset the pods at fixed intervals),
+you can create one that runs periodically and checks the session status or terminates replicas that need resetting.
+
+CronJob YAML Example:
+
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: session-cleaner
+spec:
+  schedule: "*/10 * * * *"  # Runs every 10 minutes (adjust as needed)
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cleaner
+            image: your-cleaner-image   # Custom logic to check session timeout and clean up replicas
+            command: ["sh", "-c", "/usr/bin/check-and-cleanup-sessions.sh"]
+          restartPolicy: OnFailure
+
+
+-------------------------------
+
+How It Works with Probes and CronJob:
+The liveness probe will handle the pod resets if the session becomes invalid during its lifecycle. It restarts the pod whenever the session ends.
+The CronJob will ensure periodic cleanup of any expired or stale sessions, resetting pods at scheduled intervals if needed.
+This approach ensures that the pods are reset based on session activity and allows for efficient management of replicas.
+
+
+===========================================================================================================================================
+
+**  if i am using probes then how will  be the cronjob file will be
+==>  
+If you are already using liveness and readiness probes to monitor and reset pods based on session health, you don't strictly need a CronJob to manage session resets.
+However, if you still want to use a CronJob for periodic tasks such as cleaning up old sessions, handling background maintenance, 
+or forcefully resetting pods based on a time schedule, here's how the CronJob YAML would be structured.
+
+Example CronJob YAML File:
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: session-cleanup-job
+spec:
+  schedule: "*/30 * * * *"  # Runs every 30 minutes (adjust as needed)
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: session-cleaner
+            image: your-cleaner-image:latest  # Custom image for session cleanup
+            command: ["/bin/sh", "-c"]
+            args:
+            - |
+              # Custom script logic to check and clean up sessions
+              echo "Checking session statuses"
+              # You could use kubectl commands to check pod status or use custom session cleanup logic
+              kubectl delete pods -l session=expired || true
+          restartPolicy: OnFailure
+
+
+---------------------------------------------------------
+
+Key Points:
+schedule: This controls how often the CronJob runs. In this example, the CronJob runs every 30 minutes. 
+You can adjust the time as needed (e.g., every hour, every day).
+
+containers: The CronJob runs in a container. You can define your custom logic (like session cleanup or terminating specific pods) in this container.
+
+command and args: This part of the YAML defines the shell commands that the container will execute. You could use a custom script, or leverage Kubernetes commands 
+(kubectl delete pods) to terminate expired session pods.
+
+restartPolicy: The CronJob will only restart the job if it fails.
+
+How the CronJob Works:
+The CronJob periodically checks for expired sessions and performs cleanup operations such as deleting pods that are no longer needed.
+You can use custom logic (in your Docker image or as part of your script) to interact with the Kubernetes API to check pod states and clean them up as necessary.
+This ensures periodic management of resources, even when probes handle session resets dynamically.
+Combining with Probes:
+Liveness and readiness probes will handle session resets based on actual session health, resetting pods if the session is terminated.
+The CronJob adds an extra layer by periodically ensuring cleanup in case of any stale or missed sessions that probes didn't catch or clean.
+This approach ensures robust session management, with probes handling active resets and the CronJob acting as a backup cleanup mechanism.
+
+
+------------------------------------------------------------------------------------
+
+** is that happens  only using porbes for resetting the replicas after the session over the replica has to be reset 
+==> 
+Using only probes for resetting replicas after a session timeout may not be sufficient,
+as probes in Kubernetes are primarily designed to monitor the health of containers and manage their lifecycle. 
+Here's why:
+
+Probes Purpose:
+Liveness probes ensure the container is still running. If the probe fails, Kubernetes will restart the container.
+Readiness probes determine if the container is ready to serve requests. If the probe fails, Kubernetes will remove the pod from the service endpoints.
+Startup probes can be used to control when a pod is considered ready during startup.
+None of these probes directly track session timeout for individual users. They primarily focus on whether the container (or pod) is healthy or not.
+So while probes are useful for general health checks and lifecycle management, they don’t inherently know when a session is over or if it should trigger a reset based on that.
+
+Using Probes with Session Handling Logic
+If you want to reset a replica after a session ends, you need a way to track session timeouts explicitly within your application or externally manage it. 
+
+Here's how you could incorporate that logic:
+
+Application-Level Session Tracking:
+
+Implement logic in your application that tracks when a user session starts and ends.
+The application could mark the container (or pod) as "unhealthy" once a session ends, 
+which could then trigger a liveness or readiness probe failure, causing Kubernetes to restart the pod. However, 
+this relies on the application to signal the state to Kubernetes.
+
+External Session Timeout Tracking:
+
+Use an external system or mechanism (such as a sidecar container or a monitoring service) to track session durations.
+Once the session is over, you can trigger the Kubernetes API to terminate or reset the pod explicitly.
+Is Using Only Probes Sufficient for Session Timeouts?
+No, probes alone are not enough for managing session-based pod resets. They only monitor pod health and readiness, not session state.
+For full session management, including resetting after a timeout, you need to incorporate session handling logic at the application level 
+or use an external job like a CronJob for periodic session cleanup.
+
+Why Use Probes:
+Probes are effective at monitoring pod health but need custom logic (or external systems) to handle the session expiration aspect and pod resets.
+Probes can assist in resetting a pod after it becomes unhealthy or after you explicitly signal it through application logic.
+For your specific case of resetting pods after sessions, you likely need both application-level session management and probes (to monitor pod health and manage restarts if needed).
+
+==============================================================================================================
+***
+
+# Use the official PHP image as the base image
+FROM php:7.4-apache
+
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Copy the PHP file into the container
+COPY index.php /var/www/html
+
+# Expose port 80 for web access
+EXPOSE 80
+
+# Start Apache in the foreground (necessary to keep the container running)
+CMD ["apache2-foreground"]
+-------------
+this is dockerfile make changes in this to implement that mechanism helathcheck
+
+===>
+To implement health check functionality in your Dockerfile, you'll need to modify your PHP application to include a way to check whether a session has expired. 
+Here's how you can enhance your Dockerfile and your PHP code.
+
+Modified Dockerfile
+Add a new PHP script for the health check and modify your Dockerfile accordingly:
+
+Dockerfile:
+
+# Use the official PHP image as the base image
+FROM php:7.4-apache
+
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Copy the main PHP file into the container
+COPY index.php /var/www/html
+# Copy the health check PHP file into the container
+COPY health.php /var/www/html
+
+# Expose port 80 for web access
+EXPOSE 80
+
+# Start Apache in the foreground (necessary to keep the container running)
+CMD ["apache2-foreground"]
+
+-----------------------------------------------------------------------------
+
+New health.php Script
+Create a new file named health.php in the same directory as your Dockerfile. This script will check the session status:
+
+php
+
+<?php
+session_start();
+
+// Check if the session variable 'last_activity' is set
+if (isset($_SESSION['last_activity'])) {
+    // Calculate session duration
+    $session_duration = time() - $_SESSION['last_activity'];
+
+    // Set session timeout limit (e.g., 5 minutes)
+    $timeout_limit = 300; // 300 seconds
+
+    // Check if the session has expired
+    if ($session_duration > $timeout_limit) {
+        // Session expired, return an unhealthy response
+        http_response_code(503); // Service Unavailable
+        echo json_encode(["status" => "unhealthy", "message" => "Session expired."]);
+        exit();
+    }
+}
+
+// Update last activity time
+$_SESSION['last_activity'] = time();
+
+// Return healthy status
+http_response_code(200); // OK
+echo json_encode(["status" => "healthy"]);
+
+----------------------------------------------------------------
+
+** Explanation :
+
+Health Check Mechanism:
+
+The health.php script checks if the session has expired based on the last activity timestamp stored in $_SESSION['last_activity'].
+If the session is inactive for more than the specified limit (5 minutes in this case), it returns a 503 HTTP status code to indicate that the service is unhealthy.
+
+
+Deployment Configuration:
+
+Ensure that your Kubernetes deployment uses the /health endpoint to perform liveness and readiness probes. 
+Update your deployment YAML to reference the new health check endpoint:
+yaml
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+-----------------------------------------------
+
+Summary
+With these changes, your PHP application will now respond with the appropriate health status based on the session state. 
+If the session has expired, the health check will fail, prompting Kubernetes to reset the pod as defined by your probes.
+Make sure to rebuild your Docker image and redeploy your application after making these changes!
+
+
+
+=================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
