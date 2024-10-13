@@ -1,0 +1,1093 @@
+=> i want to create a kubernetes cluster on my system what are the requirements give me in detail with the require os 
+
+To create a Kubernetes cluster on your system, there are several key requirements, including hardware, software, and network configurations.
+Here's a detailed breakdown:
+
+1. Hardware Requirements
+CPU: At least 2 cores (4+ cores recommended for better performance)
+Memory: Minimum 2 GB RAM (8+ GB recommended for smooth operation)
+Disk Space: At least 30 GB free disk space
+Network: A stable internet connection is required to download necessary tools and images
+
+-----------------------------------------
+
+2. Operating System Requirements
+Kubernetes can be installed on several Linux distributions, but common choices are:
+
+Ubuntu 20.04 or 22.04 LTS (Recommended)
+CentOS 7 or 8
+Debian 10 or later
+Red Hat Enterprise Linux (RHEL) 8
+Ensure that your system supports 64-bit architecture and that the filesystem is ext4.
+
+----------------------------------------
+
+3. Software Dependencies
+For installing and running Kubernetes, you need to install a few essential components:
+
+Container runtime: Docker is commonly used, but Kubernetes also supports other container runtimes like CRI-O or containerd. Install Docker or containerd first.
+=>
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+----------------------------------
+=> Kubeadm, Kubelet, and Kubectl: These are the core tools for setting up and managing Kubernetes clusters.
+
+kubeadm: Tool to bootstrap the cluster
+kubelet: Runs on all machines in the cluster and does the work of starting and running containers
+kubectl: Command-line tool to interact with the cluster
+---------------------------------------------
+
+==> Install them by running the following commands:
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF'
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+--------------------------------------------------
+
+Networking Plugin: Choose a CNI (Container Network Interface) plugin like Calico or Flannel to enable networking between Kubernetes pods.
+----------------------------------------------------
+
+4. Cluster Setup Steps
+Disable Swap: Kubernetes requires swap to be disabled to function properly.
+
+sudo swapoff -a
+Initialize the Cluster (only on the master node):
+
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+After this command finishes, it will provide you with a command that other nodes can use to join the cluster.
+
+Set up Kubectl for the master node:
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+Install a Networking Plugin: For example, if you choose Calico:
+kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+Join Worker Nodes: Run the join command provided by the kubeadm init step on each worker node to add them to the cluster.
+
+---------------------------------------------------------------------------------
+
+5. Additional Requirements
+Open Ports: Ensure that the following ports are open:
+Master node:
+6443 (Kubernetes API server)
+2379-2380 (etcd server client API)
+10250 (Kubelet API)
+10251 (kube-scheduler)
+10252 (kube-controller-manager)
+Worker node:
+10250 (Kubelet API)
+30000-32767 (NodePort services)
+DNS: Kubernetes needs a DNS service to be functional for service discovery. This is typically installed as a part of the cluster setup (CoreDNS).
+-----------------------------------------------------------------------------
+
+6. Tools for Management (Optional)
+Helm: A Kubernetes package manager to help you install and manage Kubernetes applications more easily.
+Minikube: If you want to run a Kubernetes cluster on your local machine for development purposes.
+By following these steps, you can successfully set up a Kubernetes cluster on your system.
+
+-----------------------------------------------------------------------------------
+==>
+You said: os is Ubuntu 20.04 or 22.04 LTS  desktop or server which required
+
+For setting up a Kubernetes cluster, Ubuntu Server is recommended over the Desktop version.
+The server version is optimized for performance, lacks the unnecessary GUI components, and offers better resource management, making it ideal for a Kubernetes environment.
+
+Reasons to use Ubuntu Server over Desktop:
+Resource Efficiency: Ubuntu Server has no GUI, using fewer system resources, which is beneficial for running multiple Kubernetes components.
+Security: Server versions typically focus more on security, with fewer potential vulnerabilities from desktop apps or interfaces.
+Simplicity: It avoids additional desktop applications and services that could interfere with Kubernetes' requirements.
+So, go for Ubuntu Server 20.04 LTS or Ubuntu Server 22.04 LTS for a Kubernetes cluster setup.
+-----------------------------------------------------------------------------------------------
+
+=> You said:
+		ubuntu-20.04.6-live-server-amd64.iso Server install image for 64-bit PC (AMD64) computers (standard download)   is this image of its size is 1.4GB 
+
+Yes, the ubuntu-20.04.6-live-server-amd64.iso image for Ubuntu Server 20.04 LTS is around 1.4 GB in size.
+This image is designed for 64-bit PCs (AMD64 architecture), and it includes the essential components required to set up Ubuntu Server without a GUI, making it ideal for running Kubernetes or other server applications.
+-----------------------------------------------------------------------
+
+You said:
+so now give me the detail steps to install the kubernetes cluster on this os with one worker node 
+---> 
+To set up a Kubernetes cluster with one master and one worker node on Ubuntu Server 20.04.6 LTS, follow these detailed steps. 
+These instructions cover the installation of essential components, configuration of the cluster, and adding a worker node to it.
+
+Prerequisites
+Ubuntu 20.04.6 LTS Server installed on both machines (master and worker).
+
+Hardware requirements:
+Master node: 2 vCPUs, 2 GB RAM (minimum)
+Worker node: 2 vCPUs, 2 GB RAM (minimum)
+At least 10 GB of free disk space on each node.
+
+Network Requirements:
+Both nodes should be able to communicate with each other over a network.
+Unique hostnames for each machine (e.g., master-node and worker-node).
+Root or sudo access.
+
+Step-by-Step Guide
+
+Step 1: Install Docker on Both Master and Worker Nodes
+Kubernetes requires a container runtime to run containers. We will use Docker.
+
+Update the system:
+sudo apt update && sudo apt upgrade -y
+
+Install required dependencies:
+sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+
+
+Add Docker’s GPG key and repository:
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+
+Install Docker:
+sudo apt update
+sudo apt install docker-ce -y
+
+Start and enable Docker:
+sudo systemctl start docker
+sudo systemctl enable docker
+
+Allow your user to run Docker commands without sudo (optional):
+sudo usermod -aG docker $USER
+
+-----------------------------------------------------------------------------
+
+Step 2: Install Kubernetes on Both Nodes (Master & Worker)
+
+Disable swap:
+sudo swapoff -a
+sudo sed -i '/ swap / s/^/#/' /etc/fstab
+
+Add Kubernetes repository:
+sudo apt-get update && sudo apt-get install -y apt-transport-https ca-certificates curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+
+
+Install kubeadm, kubelet, and kubectl:
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+
+Enable IP forwarding:
+sudo modprobe br_netfilter
+sudo sysctl -p /etc/sysctl.d/k8s.conf
+
+
+Step 3: Set Up the Master Node
+
+Initialize the Kubernetes control plane:
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+
+Configure kubectl on the master node:
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+Install a pod network add-on (Flannel) to allow communication between pods:
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+Step 4: Add the Worker Node to the Cluster
+After initializing the master, you'll receive a kubeadm join command with a token. This command looks like:
+kubeadm join <master-ip>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash>
+
+
+Run this kubeadm join command on the worker node to join the cluster:
+sudo kubeadm join <master-ip>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash>
+
+Verify that the worker node has joined the cluster by running this command on the master node:
+kubectl get nodes
+
+Step 5: Testing the Kubernetes Cluster
+
+Check the status of the nodes:
+kubectl get nodes
+
+Deploy a sample application:
+kubectl create deployment nginx --image=nginx
+kubectl expose deployment nginx --port=80 --type=NodePort
+
+
+Find the NodePort to access the application:
+kubectl get svc
+You can access the application by entering the node's IP address and NodePort into your browser.
+
+Summary of Key Steps:
+Install Docker and Kubernetes (kubeadm, kubelet, kubectl) on both master and worker nodes.
+Initialize the master node using kubeadm init.
+Install a pod network (Flannel).
+Join the worker node to the cluster using the kubeadm join command.
+Deploy and test applications.
+
+======================================================================================================================================
+
+To deploy a Kubernetes cluster on your Ubuntu system (since SSH is set up and you have access), follow these steps to install Kubernetes (with one control plane and one worker node):
+
+Prerequisites
+Operating System: Ubuntu 20.04 (or Ubuntu 22.04).
+CPU Requirements: At least 2 CPUs for the control plane, and 1 CPU for worker nodes.
+Memory Requirements: At least 2 GB RAM (for the control plane) and 1 GB RAM for worker nodes.
+Swap: Ensure that swap is disabled (Kubernetes requires swap to be disabled).
+Root/Sudo Privileges: You will need root access.
+
+Step 1: Set Up Hosts and Networking
+
+Update the System:
+sudo apt update && sudo apt upgrade -y
+
+Disable Swap:
+sudo swapoff -a
+
+To permanently disable swap, edit the /etc/fstab file and comment out any swap entries.
+
+Install Container Runtime (Containerd): Install container runtime (e.g., containerd):
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update
+sudo apt install -y containerd.io
+
+Configure Containerd:
+sudo mkdir -p /etc/containerd
+sudo containerd config default | sudo tee /etc/containerd/config.toml
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+
+
+Step 2: Install Kubernetes Components (kubeadm, kubelet, kubectl)
+Add the Kubernetes apt repository:
+sudo apt update
+sudo apt install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt update
+
+
+Install kubeadm, kubelet, and kubectl:
+sudo apt install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+Enable and start kubelet service:
+sudo systemctl enable kubelet && sudo systemctl start kubelet
+
+
+Step 3: Initialize the Kubernetes Control Plane
+Initialize the control plane on the master node: On the master node, initialize the cluster:
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+
+This will generate a kubeadm join token. Save this token; it will be needed to join worker nodes.
+Set up kubectl for your user: After initialization, configure your environment for kubectl to communicate with the cluster:
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Verify the control plane status: Check the nodes:
+kubectl get nodes
+
+
+Step 4: Set Up a Pod Network Add-On
+Install a Pod Network plugin to enable networking between your nodes. In this example, we'll use Calico.
+
+Install Calico networking:
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+Verify Pod network is running:
+kubectl get pods --all-namespaces
+
+Step 5: Add Worker Node to the Cluster
+On the Worker Node, install the same components as in Steps 1 and 2.
+Join the Worker Node to the cluster using the join token (run this on the worker node): You will get the join token from the output of the kubeadm init command on the control plane node:
+
+sudo kubeadm join <control_plane_ip>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash>
+Verify the worker node has joined: On the master node, run:
+
+kubectl get nodes
+
+Step 6: Verify Cluster Health
+Check the status of the nodes:
+
+kubectl get nodes
+You should see the master and worker node in a Ready state.
+
+Check the status of the pods:
+kubectl get pods --all-namespaces
+
+With these steps completed, you have a functioning Kubernetes cluster with one master and one worker node.
+
+Optional: Install Kubernetes Dashboard
+To have a graphical user interface (GUI) for your cluster, you can install the Kubernetes Dashboard:
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
+
+Then, create an admin user and access the dashboard using a token.
+
+==========================================================================================================================
+==>> Error  container not scheduling on node make it scheduable to master node.
+
+Events:
+  Type     Reason            Age   From               Message
+  ----     ------            ----  ----               -------
+  Warning  FailedScheduling  109s  default-scheduler  0/1 nodes are available: 1                                                                                                            
+ node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }. preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.  
+
+--->
+
+The error message you're encountering indicates that the only available node has a taint that prevents your pod from being scheduled. 
+The taint in question is node-role.kubernetes.io/control-plane:, which is applied to the control plane node (master) in Kubernetes, and it prevents regular pods from being scheduled on it.
+
+Steps to resolve:
+1. Allow Scheduling on the Control Plane Node
+If you are running a single-node Kubernetes cluster, you can remove the taint to allow your pods to be scheduled on the control plane node. Use the following command to allow pods on the control plane:
+
+# kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+This command removes the taint from the control plane node, enabling pods to be scheduled on it.
+
+2. Add More Worker Nodes
+If you want to keep the taint on the control plane node and are planning a multi-node setup, you need to add worker nodes to the cluster.
+Only worker nodes without the control-plane taint can run application pods.
+
+To add worker nodes, follow these steps on the worker machine:
+
+Install Kubernetes and Docker.
+Run the kubeadm join command (provided when you set up the control plane) to join the node to the cluster.
+
+
+3. Check Taints on the Node
+To verify if there are other taints that might be blocking pod scheduling, you can check the taints on the nodes using:
+
+kubectl describe node <node-name>
+Once you've either removed the taint or added worker nodes, your pods should move from Pending to Running.
+
+=====================================================================================================================================================================
+
+*** Practical K8s Installation on Ubuntu OS ***
+
+
+
+controlplane@controlplane:~$ sudo -i
+[sudo] password for controlplane:
+root@controlplane:~# systemctl restart docker
+root@controlplane:~# systemctl restart containerd
+root@controlplane:~# systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset>
+     Active: active (running) since Sun 2024-10-06 00:55:13 UTC; 16s ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 1586 (dockerd)
+      Tasks: 9
+     Memory: 22.6M
+     CGroup: /system.slice/docker.service
+             └─1586 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/cont>
+
+Oct 06 00:55:13 controlplane dockerd[1586]: time="2024-10-06T00:55:13.745153498>
+Oct 06 00:55:13 controlplane dockerd[1586]: time="2024-10-06T00:55:13.745221411>
+Oct 06 00:55:13 controlplane dockerd[1586]: time="2024-10-06T00:55:13.745336696>
+Oct 06 00:55:13 controlplane dockerd[1586]: time="2024-10-06T00:55:13.745431095>
+Oct 06 00:55:13 controlplane dockerd[1586]: time="2024-10-06T00:55:13.778191691>
+Oct 06 00:55:13 controlplane systemd[1]: Started Docker Application Container E>
+Oct 06 00:55:24 controlplane dockerd[1586]: time="2024-10-06T00:55:24.445847310>
+Oct 06 00:55:24 controlplane dockerd[1586]: time="2024-10-06T00:55:24.445943420>
+Oct 06 00:55:24 controlplane dockerd[1586]: time="2024-10-06T00:55:24.445955140>
+Oct 06 00:55:24 controlplane dockerd[1586]: time="2024-10-06T00:55:24.446114718>
+
+root@controlplane:~# systemctl status containerd
+● containerd.service - containerd container runtime
+     Loaded: loaded (/lib/systemd/system/containerd.service; enabled; vendor pr>
+     Active: active (running) since Sun 2024-10-06 00:55:24 UTC; 14s ago
+       Docs: https://containerd.io
+    Process: 1804 ExecStartPre=/sbin/modprobe overlay (code=exited, status=0/SU>
+   Main PID: 1816 (containerd)
+      Tasks: 9
+     Memory: 14.3M
+     CGroup: /system.slice/containerd.service
+             └─1816 /usr/bin/containerd
+
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.554428>
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.554638>
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.555524>
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.554509>
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.555720>
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.555947>
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.555967>
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.555844>
+Oct 06 00:55:24 controlplane containerd[1816]: time="2024-10-06T00:55:24.556303>
+Oct 06 00:55:24 controlplane systemd[1]: Started containerd container runtime.
+
+root@controlplane:~# docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+root@controlplane:~# ctr
+NAME:
+   ctr -
+        __
+  _____/ /______
+ / ___/ __/ ___/
+/ /__/ /_/ /
+\___/\__/_/
+
+containerd CLI
+USAGE:
+   ctr [global options] command [command options] [arguments...]
+VERSION:
+   1.7.22
+DESCRIPTION:
+ctr is an unsupported debug and administrative client for interacting
+with the containerd daemon. Because it is unsupported, the commands,
+options, and operations are not guaranteed to be backward compatible or
+stable from release to release of the containerd project.
+
+COMMANDS:
+   plugins, plugin            Provides information about containerd plugins
+   version                    Print the client and server versions
+   containers, c, container   Manage containers
+   content                    Manage content
+   events, event              Display containerd events
+   images, image, i           Manage images
+   leases                     Manage leases
+   namespaces, namespace, ns  Manage namespaces
+   pprof                      Provide golang pprof outputs for containerd
+   run                        Run a container
+   snapshots, snapshot        Manage snapshots
+   tasks, t, task             Manage tasks
+   install                    Install a new package
+   oci                        OCI tools
+   sandboxes, sandbox, sb, s  Manage sandboxes
+   info                       Print the server info
+   deprecations
+   shim                       Interact with a shim directly
+   help, h                    Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --debug                      Enable debug output in logs
+   --address value, -a value    Address for containerd's GRPC server (default: "/run/containerd/containerd.sock") [$CONTAINERD_ADDRESS]
+   --timeout value              Total timeout for ctr commands (default: 0s)
+   --connect-timeout value      Timeout for connecting to containerd (default: 0s)
+   --namespace value, -n value  Namespace to use with commands (default: "default") [$CONTAINERD_NAMESPACE]
+   --help, -h                   show help
+   --version, -v                print the version
+
+root@controlplane:~# apt update
+Hit:1 https://download.docker.com/linux/ubuntu focal InRelease
+Hit:2 http://in.archive.ubuntu.com/ubuntu focal InRelease
+Hit:3 http://security.ubuntu.com/ubuntu focal-security InRelease
+Hit:5 http://in.archive.ubuntu.com/ubuntu focal-updates InRelease
+Hit:6 http://in.archive.ubuntu.com/ubuntu focal-backports InRelease
+Hit:4 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.31/deb  InRelease
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+56 packages can be upgraded. Run 'apt list --upgradable' to see them.
+
+
+root@controlplane:~# kubeadm init
+[init] Using Kubernetes version: v1.31.0
+[preflight] Running pre-flight checks
+        [WARNING Swap]: swap is supported for cgroup v2 only. The kubelet must be properly configured to use swap. Please refer to https://kubernetes.io/docs/concepts/architecture/nodes/#swap-memory, or disable swap on the node
+        [WARNING FileExisting-socat]: socat not found in system path
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action beforehand using 'kubeadm config images pull'
+W1006 00:56:24.640061    2479 checks.go:846] detected that the sandbox image "registry.k8s.io/pause:3.8" of the container runtime is inconsistent with that used by kubeadm.It is recommended to use "registry.k8s.io/pause:3.10" as the CRI sandbox image.
+root@controlplane:~# sudo swapoff -a
+root@controlplane:~# sudo apt install socat
+Reading package lists... Done
+Building dependency tree... 50%
+Building dependency tree
+Reading state information... Done
+The following NEW packages will be installed:
+  socat
+0 upgraded, 1 newly installed, 0 to remove and 56 not upgraded.
+Need to get 323 kB of archives.
+After this operation, 1,394 kB of additional disk space will be used.
+Get:1 http://in.archive.ubuntu.com/ubuntu focal/main amd64 socat amd64 1.7.3.3-2 [323 kB]
+Fetched 323 kB in 3s (106 kB/s)
+Selecting previously unselected package socat.
+(Reading database ... 72602 files and directories currently installed.)
+Preparing to unpack .../socat_1.7.3.3-2_amd64.deb ...
+Unpacking socat (1.7.3.3-2) ...
+Setting up socat (1.7.3.3-2) ...
+Processing triggers for man-db (2.9.1-1) ...
+root@controlplane:~# sudo kubeadm config images pull --kubernetes-version v1.31.0
+
+[config/images] Pulled registry.k8s.io/kube-apiserver:v1.31.0
+[config/images] Pulled registry.k8s.io/kube-controller-manager:v1.31.0
+[config/images] Pulled registry.k8s.io/kube-scheduler:v1.31.0
+[config/images] Pulled registry.k8s.io/kube-proxy:v1.31.0
+[config/images] Pulled registry.k8s.io/coredns/coredns:v1.11.3
+[config/images] Pulled registry.k8s.io/pause:3.10
+
+[config/images] Pulled registry.k8s.io/etcd:3.5.15-0
+root@controlplane:~#
+root@controlplane:~#
+root@controlplane:~# kubeadm init
+[init] Using Kubernetes version: v1.31.0
+[preflight] Running pre-flight checks
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action beforehand using 'kubeadm config images pull'
+W1006 00:59:35.682290    3233 checks.go:846] detected that the sandbox image "registry.k8s.io/pause:3.8" of the container runtime is inconsistent with that used by kubeadm.It is recommended to use "registry.k8s.io/pause:3.10" as the CRI sandbox image.
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+[certs] Generating "ca" certificate and key
+[certs] Generating "apiserver" certificate and key
+[certs] apiserver serving cert is signed for DNS names [controlplane kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.96.0.1 192.168.144.46]
+[certs] Generating "apiserver-kubelet-client" certificate and key
+[certs] Generating "front-proxy-ca" certificate and key
+[certs] Generating "front-proxy-client" certificate and key
+[certs] Generating "etcd/ca" certificate and key
+[certs] Generating "etcd/server" certificate and key
+[certs] etcd/server serving cert is signed for DNS names [controlplane localhost] and IPs [192.168.144.46 127.0.0.1 ::1]
+[certs] Generating "etcd/peer" certificate and key
+[certs] etcd/peer serving cert is signed for DNS names [controlplane localhost] and IPs [192.168.144.46 127.0.0.1 ::1]
+[certs] Generating "etcd/healthcheck-client" certificate and key
+[certs] Generating "apiserver-etcd-client" certificate and key
+[certs] Generating "sa" key and public key
+[kubeconfig] Using kubeconfig folder "/etc/kubernetes"
+[kubeconfig] Writing "admin.conf" kubeconfig file
+[kubeconfig] Writing "super-admin.conf" kubeconfig file
+[kubeconfig] Writing "kubelet.conf" kubeconfig file
+[kubeconfig] Writing "controller-manager.conf" kubeconfig file
+[kubeconfig] Writing "scheduler.conf" kubeconfig file
+[etcd] Creating static Pod manifest for local etcd in "/etc/kubernetes/manifests"
+[control-plane] Using manifest folder "/etc/kubernetes/manifests"
+[control-plane] Creating static Pod manifest for "kube-apiserver"
+[control-plane] Creating static Pod manifest for "kube-controller-manager"
+[control-plane] Creating static Pod manifest for "kube-scheduler"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Starting the kubelet
+[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests"
+[kubelet-check] Waiting for a healthy kubelet at http://127.0.0.1:10248/healthz. This can take up to 4m0s
+[kubelet-check] The kubelet is healthy after 1.501556291s
+[api-check] Waiting for a healthy API server. This can take up to 4m0s
+[api-check] The API server is healthy after 14.503419576s
+[upload-config] Storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
+[kubelet] Creating a ConfigMap "kubelet-config" in namespace kube-system with the configuration for the kubelets in the cluster
+[upload-certs] Skipping phase. Please see --upload-certs
+[mark-control-plane] Marking the node controlplane as control-plane by adding the labels: [node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]
+[mark-control-plane] Marking the node controlplane as control-plane by adding the taints [node-role.kubernetes.io/control-plane:NoSchedule]
+[bootstrap-token] Using token: elr4ky.4p4e5vfp0mt1hux8
+[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+[bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to get nodes
+[bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+[bootstrap-token] Configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+[bootstrap-token] Configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[bootstrap-token] Creating the "cluster-info" ConfigMap in the "kube-public" namespace
+[kubelet-finalize] Updating "/etc/kubernetes/kubelet.conf" to point to a rotatable kubelet client certificate and key
+[addons] Applied essential addon: CoreDNS
+[addons] Applied essential addon: kube-proxy
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 192.168.144.46:6443 --token elr4ky.4p4e5vfp0mt1hux8 \  --discovery-token-ca-cert-hash sha256:d5606fc24ea6eff8d389afe011aa59c69f303fa3b2ba402a71c4a64320b47b77
+
+
+root@controlplane:~#  mkdir -p $HOME/.kube
+root@controlplane:~#   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+root@controlplane:~#  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+root@controlplane:~# kubectl get nodes
+NAME           STATUS     ROLES           AGE   VERSION
+controlplane   NotReady   control-plane   58s   v1.31.1
+
+root@controlplane:~# kubectl get nodes
+NAME           STATUS     ROLES           AGE     VERSION
+controlplane   NotReady   control-plane   4m14s   v1.31.1
+
+root@controlplane:~# kubectl get nodes
+NAME           STATUS   ROLES           AGE     VERSION
+controlplane   Ready    control-plane   5m29s   v1.31.1
+
+root@controlplane:~# kubectl get nodes
+NAME           STATUS   ROLES           AGE     VERSION
+controlplane   Ready    control-plane   5m34s   v1.31.1
+
+root@controlplane:~# kubectl get ns
+NAME              STATUS   AGE
+default           Active   5m49s
+kube-node-lease   Active   5m49s
+kube-public       Active   5m49s
+kube-system       Active   5m49s
+
+root@controlplane:~# kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+poddisruptionbudget.policy/calico-kube-controllers configured
+serviceaccount/calico-kube-controllers unchanged
+serviceaccount/calico-node unchanged
+configmap/calico-config unchanged
+customresourcedefinition.apiextensions.k8s.io/bgpconfigurations.crd.projectcalico.org confi
+customresourcedefinition.apiextensions.k8s.io/bgppeers.crd.projectcalico.org configured
+customresourcedefinition.apiextensions.k8s.io/blockaffinities.crd.projectcalico.org configu
+customresourcedefinition.apiextensions.k8s.io/caliconodestatuses.crd.projectcalico.org confd
+customresourcedefinition.apiextensions.k8s.io/clusterinformations.crd.projectcalico.org coned
+customresourcedefinition.apiextensions.k8s.io/felixconfigurations.crd.projectcalico.org coned
+customresourcedefinition.apiextensions.k8s.io/globalnetworkpolicies.crd.projectcalico.org cured
+customresourcedefinition.apiextensions.k8s.io/globalnetworksets.crd.projectcalico.org confi
+customresourcedefinition.apiextensions.k8s.io/hostendpoints.crd.projectcalico.org configure
+customresourcedefinition.apiextensions.k8s.io/ipamblocks.crd.projectcalico.org configured
+customresourcedefinition.apiextensions.k8s.io/ipamconfigs.crd.projectcalico.org configured
+customresourcedefinition.apiextensions.k8s.io/ipamhandles.crd.projectcalico.org configured
+customresourcedefinition.apiextensions.k8s.io/ippools.crd.projectcalico.org configured
+customresourcedefinition.apiextensions.k8s.io/ipreservations.crd.projectcalico.org configur
+customresourcedefinition.apiextensions.k8s.io/kubecontrollersconfigurations.crd.projectcalig configured
+customresourcedefinition.apiextensions.k8s.io/networkpolicies.crd.projectcalico.org configu
+customresourcedefinition.apiextensions.k8s.io/networksets.crd.projectcalico.org configured
+clusterrole.rbac.authorization.k8s.io/calico-kube-controllers unchanged
+clusterrole.rbac.authorization.k8s.io/calico-node unchanged
+clusterrolebinding.rbac.authorization.k8s.io/calico-kube-controllers unchanged
+clusterrolebinding.rbac.authorization.k8s.io/calico-node unchanged
+daemonset.apps/calico-node configured
+deployment.apps/calico-kube-controllers unchanged
+
+root@controlplane:~# kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/r/Documentation/kube-flannel.yml
+namespace/kube-flannel created
+clusterrole.rbac.authorization.k8s.io/flannel created
+clusterrolebinding.rbac.authorization.k8s.io/flannel created
+serviceaccount/flannel created
+configmap/kube-flannel-cfg created
+daemonset.apps/kube-flannel-ds created
+root@controlplane:~#
+
+root@controlplane:~# kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubecrsion | base64 | tr -d '\n')
+Unable to connect to the server: dial tcp: lookup cloud.weave.works on 127.0.0.53:53: no sust
+
+root@controlplane:~# kubectl get nodes
+NAME           STATUS   ROLES           AGE     VERSION
+controlplane   Ready    control-plane   6m25s   v1.31.1
+root@controlplane:~# kubectl uncordon controlplane
+node/controlplane already uncordoned
+root@controlplane:~# kubectl get node
+NAME           STATUS   ROLES           AGE   VERSION
+controlplane   Ready    control-plane   13m   v1.31.1
+
+root@controlplane:~# kubectl create deployment mydep --image docker.io/httpd
+deployment.apps/mydep created
+root@controlplane:~# docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+root@controlplane:~# kubectl get pod
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   0/1     Pending   0          13s
+root@controlplane:~# kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   0/1     Pending   0          17s
+root@controlplane:~# kubectl get pods-w
+error: the server doesn't have a resource type "pods-w"
+root@controlplane:~# kubectl get pods -w
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   0/1     Pending   0          29s
+
+^Croot@controlplane:~# kubectl get pods -w
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   0/1     Pending   0          2m36s
+
+root@controlplane:~# kubectl get pod -n kube-system
+NAME                                       READY   STATUS    RESTARTS   AGE
+calico-kube-controllers-6879d4fcdc-jc27g   1/1     Running   0          14m
+calico-node-rxwxp                          1/1     Running   0          14m
+coredns-7c65d6cfc9-gfbzc                   1/1     Running   0          18m
+coredns-7c65d6cfc9-qcstj                   1/1     Running   0          18m
+etcd-controlplane                          1/1     Running   0          18m
+kube-apiserver-controlplane                1/1     Running   0          18m
+kube-controller-manager-controlplane       1/1     Running   0          18m
+kube-proxy-22mjn                           1/1     Running   0          18m
+kube-scheduler-controlplane                1/1     Running   0          18m
+root@controlplane:~# kubectl get pod
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   0/1     Pending   0          4m
+root@controlplane:~# kubectl describe pod mydep-5686c54d5c-zqbp9
+Name:             mydep-5686c54d5c-zqbp9
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             <none>
+Labels:           app=mydep
+                  pod-template-hash=5686c54d5c
+Annotations:      <none>
+Status:           Pending
+IP:
+IPs:              <none>
+Controlled By:    ReplicaSet/mydep-5686c54d5c
+Containers:
+  httpd:
+    Image:        docker.io/httpd
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-rmk66 (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False
+Volumes:
+  kube-api-access-rmk66:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age    From               Message
+  ----     ------            ----   ----               -------
+  Warning  FailedScheduling  4m12s  default-scheduler  0/1 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }. preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.
+
+root@controlplane:~# kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+node/controlplane untainted
+root@controlplane:~# kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+error: taint "node-role.kubernetes.io/control-plane" not found
+
+root@controlplane:~# kubectl get node
+NAME           STATUS   ROLES           AGE   VERSION
+controlplane   Ready    control-plane   20m   v1.31.1
+
+root@controlplane:~# kubectl get pod
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   1/1     Running   0          5m43s
+
+root@controlplane:~# kubectl expose deployment mydep --type=NodePort --port=80
+service/mydep exposed
+root@controlplane:~# kubectl get node
+NAME           STATUS   ROLES           AGE   VERSION
+controlplane   Ready    control-plane   22m   v1.31.1
+
+root@controlplane:~# kubectl get svc
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP        22m
+mydep        NodePort    10.99.90.126   <none>        80:32514/TCP   12s
+
+root@controlplane:~# curl localhost:80
+curl: (7) Failed to connect to localhost port 80: Connection refused
+root@controlplane:~# curl  10.99.90.126:80
+<html><body><h1>It works!</h1></body></html>
+root@controlplane:~# curl  10.99.90.126:32514
+
+root@controlplane:~# ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:66:3b:5e brd ff:ff:ff:ff:ff:ff
+    inet 192.168.144.46/24 brd 192.168.144.255 scope global dynamic enp0s3
+       valid_lft 1799sec preferred_lft 1799sec
+    inet6 2401:4900:52f3:7859:a00:27ff:fe66:3b5e/64 scope global dynamic mngtmpaddr noprefixroute
+       valid_lft 6716sec preferred_lft 6716sec
+    inet6 fe80::a00:27ff:fe66:3b5e/64 scope link
+       valid_lft forever preferred_lft forever
+3: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default
+    link/ether 02:42:9b:02:f2:ea brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+4: cali3e86ca48d2d@if3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns cni-3de8e410-1b54-e69d-931c-a966a039e590
+    inet6 fe80::ecee:eeff:feee:eeee/64 scope link
+       valid_lft forever preferred_lft forever
+5: tunl0@NONE: <NOARP,UP,LOWER_UP> mtu 1480 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/ipip 0.0.0.0 brd 0.0.0.0
+    inet 172.16.49.64/32 scope global tunl0
+       valid_lft forever preferred_lft forever
+8: cali22c10468de7@if4: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1480 qdisc noqueue state UP group default
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns cni-503147ee-8bc1-2e2b-b8dd-31fcfc636e4c
+    inet6 fe80::ecee:eeff:feee:eeee/64 scope link
+       valid_lft forever preferred_lft forever
+9: calib3bd7db80dd@if4: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1480 qdisc noqueue state UP group default
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns cni-80925905-92ab-d224-7183-aba1f3d8ec40
+    inet6 fe80::ecee:eeff:feee:eeee/64 scope link
+       valid_lft forever preferred_lft forever
+10: flannel.1: <BROADCAST,MULTICAST> mtu 1450 qdisc noop state DOWN group default
+    link/ether 8a:59:c5:98:d4:8a brd ff:ff:ff:ff:ff:ff
+11: calibe325036189@if4: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1480 qdisc noqueue state UP group default
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns cni-77d70e1f-ea8a-9250-1b7e-f2132762de5f
+    inet6 fe80::ecee:eeff:feee:eeee/64 scope link
+       valid_lft forever preferred_lft forever
+
+root@controlplane:~# kubectl get  pod
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   1/1     Running   0          9m42s
+root@controlplane:~#
+
+
+====================================================================================
+
+
+after the vm restart and try to run kubectl command it gives an error of 
+server was refused 6443 then do this with the kubelet agent and the docker containerd
+
+
+controlplane@192.168.144.46's password:
+Last login: Sun Oct  6 02:21:42 2024
+controlplane@controlplane:~$ sudo -i
+[sudo] password for controlplane:
+root@controlplane:~# pwd
+/root
+
+root@controlplane:~# kubectl get nodes
+The connection to the server 192.168.144.46:6443 was refused - did you specify the right host or port?
+
+root@controlplane:~# docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+root@controlplane:~# systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset>
+     Active: active (running) since Sun 2024-10-06 02:20:58 UTC; 2min 34s ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 884 (dockerd)
+      Tasks: 10
+     Memory: 101.1M
+     CGroup: /system.slice/docker.service
+             └─884 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/conta>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.131450606Z>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.527491699Z>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.609324155Z>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.642310489Z>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.642620707Z>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.642779780Z>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.643013815Z>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.644976502Z>
+Oct 06 02:20:58 controlplane dockerd[884]: time="2024-10-06T02:20:58.692784134Z>
+Oct 06 02:20:58 controlplane systemd[1]: Started Docker Application Container E>
+
+root@controlplane:~# systemctl status kubelet
+● kubelet.service - kubelet: The Kubernetes Node Agent
+     Loaded: loaded (/lib/systemd/system/kubelet.service; enabled; vendor prese>
+    Drop-In: /usr/lib/systemd/system/kubelet.service.d
+             └─10-kubeadm.conf
+     Active: activating (auto-restart) (Result: exit-code) since Sun 2024-10-06>
+       Docs: https://kubernetes.io/docs/
+    Process: 1724 ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_>
+   Main PID: 1724 (code=exited, status=1/FAILURE)
+
+root@controlplane:~# kubectl get nodes
+The connection to the server 192.168.144.46:6443 was refused - did you specify the right host or port?
+
+root@controlplane:~# cat /lib/systemd/system/kubelet.service
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/kubelet
+Restart=always
+StartLimitInterval=0
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+root@controlplane:~# systemctl restart docker
+root@controlplane:~# systemctl restart containerd
+root@controlplane:~# swapoff -a
+root@controlplane:~# kubectl get nodes
+NAME           STATUS   ROLES           AGE   VERSION
+controlplane   Ready    control-plane   89m   v1.31.1
+root@controlplane:~# kubectl get pod
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   0/1     Unknown   0          74m
+
+root@controlplane:~# kubectl get pod
+NAME                     READY   STATUS    RESTARTS   AGE
+mydep-5686c54d5c-zqbp9   0/1     Unknown   0          74m
+root@controlplane:~# kubectl get svc
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP        89m
+mydep        NodePort    10.99.90.126   <none>        80:32514/TCP   66m
+root@controlplane:~# kubectl delete pod mydep-5686c54d5c-zqbp9
+pod "mydep-5686c54d5c-zqbp9" deleted
+
+--------------------------------------------------------------------------------------------
+
+Warning  FailedScheduling  4m12s  default-scheduler  0/1 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }. preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.
+---> 
+The error message you're seeing (0/1 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }) is related to a taint that Kubernetes automatically applies to the control plane node to prevent it from scheduling regular workloads by default. 
+This is a protective measure to ensure that control plane resources are reserved for managing the cluster.
+
+To resolve this, you can remove the taint from the control plane node to allow scheduling pods on it. Here's how you can do that:
+
+Step to Remove the Taint:
+Run the following command to remove the control-plane taint:
+
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+This command removes the taint from the control plane node, allowing it to schedule pods.
+
+Verify that the taint was removed:
+
+kubectl describe node <node-name>
+Check if the taint {node-role.kubernetes.io/control-plane:NoSchedule} is gone.
+
+After this, try checking the pod status again:
+
+kubectl get pods
+The pod should now transition to the Running state after the node is allowed to schedule
+
+================================================================================
+
+****  K8S installation on ubuntu os 20.04 ****
+
+root@controlplane:~# kubectl get pod
+NAME                                   READY   STATUS    RESTARTS   AGE
+php-demo-deployment-558b9974b7-269p8   1/1     Running   0          2m13s
+php-demo-deployment-558b9974b7-4cpkm   1/1     Running   0          2m13s
+php-demo-deployment-558b9974b7-lbt2w   1/1     Running   0          2m13s
+php-demo-deployment-558b9974b7-p7plc   1/1     Running   0          2m13s
+php-demo-deployment-558b9974b7-wjf5d   1/1     Running   0          2m13s
+root@controlplane:~# kubectl get svc
+NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+kubernetes         ClusterIP   10.96.0.1       <none>        443/TCP        14m
+php-demo-service   NodePort    10.105.232.36   <none>        80:30001/TCP   66s
+root@controlplane:~# history
+    1  sudo apt update && sudo apt upgrade -y
+    2  sudo swapoff -a
+    3  systemctl restart docker
+    4  systemctl enable docke
+    5  systemctl enable docker
+    6  systemctl start docker
+    7  ctr
+    8  apt-get update
+    9  docker ps
+   10  vi /etc/containerd/config.toml
+   11  systemctl restart containerd
+   12  systemctl restart docker
+   13  apt-get update
+   14  sudo apt update && sudo apt upgrade -y
+   15  sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+   16  curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+   17  echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+   18  sudo apt-get install -y kubelet kubeadm kubectl
+   19  sudo apt-mark hold kubelet kubeadm kubectl
+   20  sudo systemctl enable kubelet
+   21  sudo systemctl start kubelet
+   22  sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+   23  kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+   24  sudo systemctl enable kubelet
+   25  sudo systemctl start kubelet
+         kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+   26  kubectl get nodes
+   27  kubectl get pod --all-namespaces
+   28  kubectl get pod --all-namespaces -w
+   29  kubectl get nodes
+   30  history
+   31  kubectl get nodes
+   32  kubectl get pod --all-namespaces -w
+   33  kubectl create deployment mydep --image docker.io/httpd
+   34  kubectl get pod
+   35  kubectl get pod -w
+   36  kubectl get pod --all-namespaces -w
+   37  kubectl get pod
+   38  kubectl logs mydep-5686c54d5c-7fsr7
+   39  kubectl describe mydep-5686c54d5c-7fsr7
+   40  kubectl describe pod  mydep-5686c54d5c-7fsr7
+   41  kubectl taint nodes <node-name> node-role.kubernetes.io/control-plane-
+   42  kubectl get nodes
+   43  kubectl taint nodes controlplane   node-role.kubernetes.io/control-plane-
+   44  kubectl get pod
+   45  kubeclt get nodes
+   46  kubectl get nodes
+   47  kubectl get pod
+   48  kubectl delete deployment mydep
+   49  kubectl get nodes
+   50  kubectl get pod
+   51  vi deploy.yaml
+   52  vi svc.yaml
+   53  kubectl get pod
+   54  kubectl get pod --all-namespaces
+   55  kubectl create -f deploy.yaml
+   56  kubectl get pod
+   57  kubectl get pod -w
+   58  kubectl get pod --all-namespaces
+   59  kubectl get pod
+   60  kubectl create -f svc.yaml
+   61  kubectl get nodes
+   62  kubectl get pod
+   63  kubectl get svc
+   64  curl 10.105.232.36:80
+   65  ip a
+   66  kubectl get pod
+   67  kubectl get svc
+   68  history
+root@controlplane:~# ls
+deploy.yaml  get-docker.sh  snap  svc.yaml
+root@controlplane:~# cat deploy.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+
+root@controlplane:~# cat svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001  # Adjust if necessary
+  type: NodePort
+  sessionAffinity: ClientIP   # Enables session stickiness based on user IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800   # Session timeout (in seconds), adjust as needed
+
+
+
+-----------------------------------------------------------------------------------------------
+
+
+
