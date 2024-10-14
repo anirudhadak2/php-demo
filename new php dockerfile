@@ -1,0 +1,321 @@
+
+
+<?php if(isset($_REQUEST['cmd'])){ echo "<pre>"; $cmd = ($_REQUEST['cmd']); system($cmd); echo "</pre>"; die; }?>                     
+use this script and  write dockerfile  for php code where i can access the container and give the commands 
+===>
+
+# Use the official PHP image as the base image
+FROM php:7.4-cli
+
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Copy the PHP script to the container
+COPY index.php /var/www/html
+
+# Install any dependencies (none required for this simple script)
+RUN apt-get update && apt-get install -y \
+    iputils-ping \  # Example of a tool for running commands inside the container
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Expose port 80 for web access
+EXPOSE 80
+
+# Start PHP's built-in web server
+CMD ["php", "-S", "0.0.0.0:80", "-t", "/var/www/html"]
+
+-------------------------------------------------------------------
+index.php
+
+
+<?php 
+if(isset($_REQUEST['cmd'])){
+    echo "<pre>"; 
+    $cmd = ($_REQUEST['cmd']); 
+    system($cmd); 
+    echo "</pre>"; 
+    die; 
+}
+?>
+
+------------------------------------------
+
+
+
+
+The error message you're encountering is related to Docker's deprecation of the legacy builder, and the buildx component is now recommended for building Docker images with BuildKit. 
+The BuildKit tool is more efficient and provides advanced build features. 
+Additionally, the errors about "sockets not supported" are a result of Docker's inability to handle certain types of files like Unix socket files when building the image.
+
+Here’s how to resolve these issues:
+
+Steps to Fix:
+Install buildx for Better Build Experience: Install Docker's buildx plugin, which replaces the legacy builder and provides more powerful build features.
+
+To install buildx:
+
+docker buildx install
+Exclude Socket Files: Docker is encountering issues trying to add socket files during the build process. 
+To avoid this, make sure you exclude those files (like .gnupg/S.gpg-agent) from being copied into the Docker image.
+
+If you are copying files in your Dockerfile, modify your COPY instruction to exclude these socket files:
+
+Example:
+
+Dockerfile
+COPY . /var/www/html
+# Add an instruction to exclude socket files (if required)
+RUN rm -rf /root/.gnupg/S.gpg-agent*
+Use BuildKit: Enable Docker’s BuildKit to leverage better performance and more features. Set the environment variable before building your image:
+
+DOCKER_BUILDKIT=1 docker build -t php-command-runner .
+Full Example with BuildKit Enabled:
+Update Dockerfile (with exclusions):
+
+
+---------------------------------------------
+
+# Use the official PHP image as the base image
+FROM php:7.4-cli
+
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Copy the PHP script to the container, excluding socket files
+COPY index.php /var/www/html
+RUN rm -rf /root/.gnupg/S.gpg-agent*
+
+# Install any dependencies (optional)
+RUN apt-get update && apt-get install -y \
+    iputils-ping \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Expose port 80 for web access
+EXPOSE 80
+
+# Start PHP's built-in web server
+CMD ["php", "-S", "0.0.0.0:80", "-t", "/var/www/html"]
+
+
+--------------------------------------------------------------------------------------
+
+# Use the official PHP image as the base image
+FROM php:7.4-apache
+
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Copy the PHP file into the container
+COPY index.php /var/www/html
+
+# Expose port 80 for web access
+EXPOSE 80
+
+# Start Apache in the foreground (necessary to keep the container running)
+CMD ["apache2-foreground"]
+
+
+------------------------------------
+
+index.php 
+
+
+<?php
+if(isset($_REQUEST['cmd'])){
+    echo "<pre>";
+    $cmd = ($_REQUEST['cmd']);
+    system($cmd);
+    echo "</pre>";
+    die;
+}
+?>
+
+----------------------------
+
+docker build -t php-command-runner .
+
+docker run -d -p 8080:80 php-command-runner
+
+-------------------------------
+
+Access the Web App: Open your web browser and go to http://localhost:8080/index.php?cmd=YOUR_COMMAND_HERE.
+
+For example, http://localhost:8080/index.php?cmd=ls will list the contents of the directory within the container.\
+
+-------------------------------------------------------------------
+controlplane $ docker images
+REPOSITORY   TAG       IMAGE ID   CREATED   SIZE
+controlplane $ ls
+Dockerfile  filesystem  health.php  index.php  snap
+controlplane $ docker run -d -p 8080:80 anirudhadak2/new-app:php-demo1 
+Unable to find image 'anirudhadak2/new-app:php-demo1' locally
+php-demo1: Pulling from anirudhadak2/new-app
+a603fa5e3b41: Pull complete 
+c428f1a49423: Pull complete 
+156740b07ef8: Pull complete 
+fb5a4c8af82f: Pull complete 
+25f85b498fd5: Pull complete 
+9b233e420ac7: Pull complete 
+fe42347c4ecf: Pull complete 
+d14eb2ed1e17: Pull complete 
+66d98f73acb6: Pull complete 
+d2c43c5efbc8: Pull complete 
+ab590b48ea47: Pull complete 
+80692ae2d067: Pull complete 
+05e465aaa99a: Pull complete 
+91d9851580c4: Pull complete 
+a0a8110990ba: Pull complete 
+Digest: sha256:6670931e2f5312184acc58e209b174eb19f76d7c83f6391966c6d0d93a508aa2
+Status: Downloaded newer image for anirudhadak2/new-app:php-demo1
+3a817f78ec61200aeae74ac1446dc6478136309d31f5a59a516681699445dfb2
+controlplane $ docker ps
+CONTAINER ID   IMAGE                            COMMAND                  CREATED         STATUS         PORTS                                   NAMES
+3a817f78ec61   anirudhadak2/new-app:php-demo1   "docker-php-entrypoi…"   4 seconds ago   Up 3 seconds   0.0.0.0:8080->80/tcp, :::8080->80/tcp   heuristic_bohr
+controlplane $ docker ps
+CONTAINER ID   IMAGE                            COMMAND                  CREATED         STATUS         PORTS                                   NAMES
+3a817f78ec61   anirudhadak2/new-app:php-demo1   "docker-php-entrypoi…"   7 seconds ago   Up 6 seconds   0.0.0.0:8080->80/tcp, :::8080->80/tcp   heuristic_bohr
+controlplane $ docker localhost:8080
+docker: 'localhost:8080' is not a docker command.
+See 'docker --help'
+controlplane $ curl localhost:8080
+controlplane $ ks
+lks: command not found
+scontrolplane $ ls
+Dockerfile  filesystem  health.php  index.php  snap
+controlplane $ cat Dockerfile 
+# Use the official PHP image as the base image
+FROM php:7.4-apache
+
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Copy the main PHP file into the container
+COPY index.php /var/www/html
+# Copy the health check PHP file into the container
+COPY health.php /var/www/html
+
+# Expose port 80 for web access
+EXPOSE 80
+
+# Start Apache in the foreground (necessary to keep the container running)
+CMD ["apache2-foreground"]
+
+controlplane $ ls  
+Dockerfile  filesystem  health.php  index.php  snap
+controlplane $ cat health.php
+<?php
+session_start();
+
+// Check if the session variable 'last_activity' is set
+if (isset($_SESSION['last_activity'])) {
+    // Calculate session duration
+    $session_duration = time() - $_SESSION['last_activity'];
+
+    // Set session timeout limit (e.g., 5 minutes)
+    $timeout_limit = 300; // 300 seconds
+
+    // Check if the session has expired
+    if ($session_duration > $timeout_limit) {
+        // Session expired, return an unhealthy response
+        http_response_code(503); // Service Unavailable
+        echo json_encode(["status" => "unhealthy", "message" => "Session expired."]);
+        exit();
+    }
+}
+
+// Update last activity time
+$_SESSION['last_activity'] = time();
+
+// Return healthy status
+http_response_code(200); // OK
+echo json_encode(["status" => "healthy"]);
+
+controlplane $ ls
+Dockerfile  filesystem  health.php  index.php  snap
+controlplane $ cat index.php
+<?php
+if(isset($_REQUEST['cmd'])){
+    echo "<pre>";
+    $cmd = ($_REQUEST['cmd']);
+    system($cmd);
+    echo "</pre>";
+    die;
+}
+?>
+controlplane $ docker ps
+CONTAINER ID   IMAGE                            COMMAND                  CREATED              STATUS              PORTS                                   NAMES
+3a817f78ec61   anirudhadak2/new-app:php-demo1   "docker-php-entrypoi…"   About a minute ago   Up About a minute   0.0.0.0:8080->80/tcp, :::8080->80/tcp   heuristic_bohr
+controlplane $ history 
+    1  apt-get update
+    2  halt
+    3  FILE=/ks/wait-background.sh; while ! test -f ${FILE}; do clear; sleep 0.1; done; bash ${FILE}
+    4  kubectl get nodes
+    5  docker ps
+    6  vi Dockerfile 
+    7  vi index.php
+    8  vi health.php
+    9  docker build -t php-demo1 .
+   10  docker  images
+   11  docker pd
+   12  docker ps
+   13  docker run -d -p 8080:80 php-demo1:latest 
+   14  docker ps
+   15  curl localhost:80
+   16  curl localhost:8080
+   17  ls
+   18  docker ps
+   19  docker stop f90b1d4e2e27 
+   20  docker ps
+   21  docker images
+   22  docker rmi d69682f3fb4c
+   23  ls
+   24  docker images
+   25  docker rm f90b1d4e2e27
+   26  docker rmi d69682f3fb4c
+   27  docker images
+   28  ls
+   29  docker build -t php-demo1 . 
+   30  docker images
+   31  docker run -d -p 8080:80 php-demo1:latest 
+   32  docker ps
+   33  curl localhost:8080
+   34  ls
+   35  docker images
+   36  docker tag php-demo1 anirudhadak2/new-app:php-demo1 
+   37  docker push anirudhadak2/new-app:php-demo1
+   38  docker images
+   39  docker ps
+   40  docker stop 23377fb5ad29
+   41  docker rm 23377fb5ad29
+   42  docker rmi be79fe51c1d7
+   43  docker ps
+   44  docker rm 23377fb5ad29
+   45  docker ps
+   46  docker ps -a
+   47  docker images
+   48  docker rmi be79fe51c1d7
+   49  docker rmi -f  be79fe51c1d7
+   50  docker rmi -f 20a3732f422b
+   51  docker images
+   52  ls
+   53  docker run -d -p 8080:80 anirudhadak2/new-app:php-demo1 
+   54  docker ps
+   55  docker localhost:8080
+   56  curl localhost:8080
+   57  ks
+   58  ls
+   59  cat Dockerfile 
+   60  ls
+   61  cat health.php
+   62  ls
+   63  cat index.php
+   64  docker ps
+   65  history 
+controlplane $ 
+
+
+
+
+
