@@ -1,0 +1,340 @@
+login as: controlplane
+controlplane@192.168.169.170's password:
+Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-196-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Mon 14 Oct 2024 07:28:21 AM UTC
+
+  System load:             0.16
+  Usage of /:              58.8% of 13.67GB
+  Memory usage:            12%
+  Swap usage:              0%
+  Processes:               151
+  Users logged in:         1
+  IPv4 address for enp0s3: 192.168.169.170
+  IPv6 address for enp0s3: 2401:4900:530f:ece:a00:27ff:fe24:3126
+
+ * Strictly confined Kubernetes makes edge and IoT secure. Learn how MicroK8s
+   just raised the bar for easy, resilient and secure K8s cluster deployment.
+
+   https://ubuntu.com/engage/secure-kubernetes-at-the-edge
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+New release '22.04.5 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+Last login: Mon Oct 14 07:27:01 2024
+controlplane@controlplane:~$
+controlplane@controlplane:~$ sudo -i
+[sudo] password for controlplane:
+root@controlplane:~# ls
+cron.yaml     deploy2.yaml  get-docker.sh                  snap       svc1.yaml
+deploy1.yaml  deploy.yaml   k8s-metrics-server.patch.yaml  svc0.yaml  svc.yaml
+
+root@controlplane:~# ls
+cron.yaml  deploy1.yaml  deploy2.yaml  deploy.yaml  get-docker.sh  k8s-metrics-server.patch.yaml  snap  svc0.yaml  svc1.yaml  svc.yaml
+
+
+root@controlplane:~# cat deploy.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+
+------------------------------------------
+root@controlplane:~# cat svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001  # Adjust if necessary
+  type: NodePort
+  sessionAffinity: ClientIP   # Enables session stickiness based on user IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 60   # Session timeout (in seconds), adjust as needed
+
+-----------------------------------------------------------------------------
+
+root@controlplane:~# cat deploy1.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo1
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+-----------------------------------------------------
+
+root@controlplane:~# cat svc1.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001
+  type: NodePort
+  sessionAffinity: ClientIP  # Ensures session stickiness based on client IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 300  # 1-hour session timeout
+
+--------------------------------------------------------------------------------
+
+root@controlplane:~# cat deploy2.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo1
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /health.php
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health.php
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+----------------------------------------------------------
+
+root@controlplane:~# cat svc0.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001  # Adjust if necessary
+  type: NodePort
+
+------------------------------------------------------
+
+root@controlplane:~# cat cron.yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: session-reset-job
+spec:
+  schedule: "*/3 * * * *"  # Runs every 5 minutes, adjust as needed
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: session-reset
+            image: busybox:1.28
+            command:
+            - /bin/sh
+            - -c
+            - |
+              # Iterate over all pods in the deployment
+              for pod in $(kubectl get pods -l app=php-demo -o name); do
+                # Check session status by calling your app's /health endpoint
+                session_status=$(curl -s http://$pod:80/health)
+                if [ "$session_status" != "healthy" ]; then
+                  # Delete the pod to reset it
+                  kubectl delete $pod
+                fi
+              done
+          restartPolicy: OnFailure
+
+-----------------------------------------------------------------------------
+
+root@controlplane:~# cd /test/
+root@controlplane:/test# ls
+cron.yaml  dep.yaml  rolebinding.yaml  role.yaml  svc.yaml
+
+
+root@controlplane:/test# cat role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-reset-role
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "delete"]
+
+------------------------------------------
+
+root@controlplane:/test# cat rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reset-rolebinding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: Role
+  name: pod-reset-role
+  apiGroup: rbac.authorization.k8s.io
+
+-----------------------------------------
+
+root@controlplane:/test# cat dep.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-demo-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: php-demo
+  template:
+    metadata:
+      labels:
+        app: php-demo
+    spec:
+      containers:
+      - name: php-demo-container
+        image: anirudhadak2/new-app:php-demo
+        ports:
+        - containerPort: 80
+      terminationGracePeriodSeconds: 10  # Grace period to allow graceful shutdown
+
+-------------------------------------------------------------------------------------
+
+root@controlplane:/test# cat svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-demo-service
+spec:
+  selector:
+    app: php-demo
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001
+  type: NodePort
+  sessionAffinity: ClientIP  # Ensures session stickiness based on user IP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 60   # Session timeout in seconds
+
+-----------------------------------------------------------------
+
+root@controlplane:/test# cat cron.yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pod-reset-job
+spec:
+  schedule: "*/2 * * * *"  # Every 3 hours (adjust this as needed)
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: pod-terminator
+            image: bitnami/kubectl:latest  # Container with kubectl to delete pods
+            command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Deleting pods to reset them..."
+              kubectl delete pods -l app=php-demo  # Delete pods by label
+          restartPolicy: OnFailure
+
+------------------------------------------------------------------------------
+
+
+
