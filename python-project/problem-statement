@@ -1,0 +1,842 @@
+**  i have created four folder like anirudh amit saurabh  mahesh 
+i want to give  suppose the amit folder can  access by the only a 
+particular user  no other user can access it.  on my website  how can i implement it
+how can i implement sessions for that 
+i want to implement a proper access control so only the particular user can access that one particular folder content
+other users can't access the other folder  , users get restrictions to access other user folders 
+In that folder there are python scripts are there , all scripts are executable 
+if user call 1.py script  he can see the 1.py content , if he call 2.py he can see the 2.py script content. how can i implement this 
+give me  options for this in  UI , the first option will call to the 1.py that script present in the particular folder that will run , then whatever output will come
+that user can able to see on the website this are the things i want to  implement  on my website  tell that how can i implement this things 
+==>
+To implement this project, here's how you can structure it:
+
+1. Folder and User Access Control
+You can use session-based authentication to allow access to specific folders for individual users.
+
+Steps:
+
+Backend Setup:
+Use a framework like Flask or Django for the web server.
+Each user will have a unique session after logging in.
+When a user logs in, assign their folder to the session.
+
+
+from flask import Flask, session, redirect, url_for, request
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+user_folders = {
+    'amit': '/path/to/amit/folder',
+    'anirudh': '/path/to/anirudh/folder',
+    'saurabh': '/path/to/saurabh/folder',
+    'mahesh': '/path/to/mahesh/folder'
+}
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form['username']
+    if username in user_folders:
+        session['username'] = username
+        session['folder'] = user_folders[username]
+        return redirect(url_for('user_home'))
+    return "Login failed", 403
+
+-------------------------------------------
+Restrict Access: In each route that handles folder or file access, check the session to ensure users access only their own folder.
+--> @app.route('/folder/<filename>')
+def access_file(filename):
+    if 'username' not in session:
+        return "Please log in", 403
+    
+    user_folder = session['folder']
+    file_path = f"{user_folder}/{filename}"
+
+    try:
+        with open(file_path, 'r') as file:
+            content = file.read()
+        return f"<pre>{content}</pre>"
+    except FileNotFoundError:
+        return "File not found", 404
+
+------------------------------------------------------
+2. Session Management
+After successful login, store the username in the session to track user activity and maintain folder-specific access.
+
+You can implement a login/logout mechanism with Flask’s session handling to protect certain routes.
+-->
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('login'))
+
+    ---------------------------------------------
+
+    3. UI Options to Call Python Scripts
+You can create buttons or links in the UI that call the Python scripts in a user’s folder. When clicked, they trigger the execution of a specific Python script and display the output.
+
+Steps:
+
+Use Flask to set up routes for each script execution.
+Use the subprocess module to run the script when a specific button is clicked.
+
+---->
+import subprocess
+
+@app.route('/run/<script_name>')
+def run_script(script_name):
+    if 'username' not in session:
+        return "Unauthorized", 403
+
+    user_folder = session['folder']
+    script_path = f"{user_folder}/{script_name}.py"
+    
+    try:
+        output = subprocess.check_output(['python3', script_path], universal_newlines=True)
+        return f"<pre>{output}</pre>"
+    except subprocess.CalledProcessError as e:
+        return f"Error executing script: {e}", 500
+
+------------------------------------------------------------
+HTML/Frontend: You can have buttons on the frontend like this:
+
+<button onclick="location.href='/run/1'">Run 1.py</button>
+<button onclick="location.href='/run/2'">Run 2.py</button>
+
+------------------------------------------------------
+
+4. Access Restriction
+Make sure each user can only access their folder by comparing their session with the folder they are requesting.
+You can implement this logic in the route handler for script execution or folder access.
+
+5. Security Considerations
+Ensure that the Python scripts are not vulnerable to arbitrary code execution (validate the script name).
+Use proper authentication (consider OAuth2, JWT, or username-password for the login system).
+Use os.path to ensure users cannot traverse directories and access other users' files (i.e., prevent directory traversal attacks).
+
+Tools and Frameworks:
+Flask: Lightweight web framework.
+Django: If you need more built-in functionality (auth, ORM, etc.).
+subprocess: To execute Python scripts.
+HTML/JavaScript: Basic UI to create buttons and links for script execution.
+
+Advanced Option (Dockerized Python Scripts):
+If you want further isolation, you could run each script inside its own Docker container.
+This way, each user’s script runs in isolation, and you don’t have to worry about resource sharing or security concerns at the script level.
+
+----------------------------------------------------------------------------------
+=================================================================================
+
+**  Second Problem Statement  **
+
+can you give me this impelementaion on dockerfile to run this things on docker on 5000 port no.  
+and i want different ui for each user when he tries to login , give me all the details for implementation and all the scripts that required for build the 
+appropriate docker image and the for the ui of registeration page and login page and make sure that the folders are not created  already that user folder
+will be created when the user will  make registeration on the webpage then the that userid  folder will create with the userid name and only that
+user has access to the that folder no other user will get access of it . when the user we make registeration at that time the folder will create 
+and with that scripts  are automatically copy  to that folders. and use session mechanism in that to the user 
+when the user will logout all the things has to be flush out after the user work is finish. 
+give me the all the scripts and docker file   to make implementation  of this. 
+
+===>
+
+1. Folder Structure:
+
+/app
+    /templates
+        login.html
+        register.html
+        user_home.html
+    /scripts
+        sample_script.py  # This script will be copied to each user's folder
+    /master
+        (user folders created dynamically here)
+    app.py
+    Dockerfile
+    requirements.txt
+--------------------------------------------------
+
+2. Python Files and Flask Application Setup:
+
+app.py 
+
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+import os
+import sqlite3
+import subprocess
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Ensure master folder exists
+if not os.path.exists('master'):
+    os.makedirs('master')
+
+# Database setup function
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      username TEXT NOT NULL UNIQUE,
+                      password TEXT NOT NULL)''')
+    conn.commit()
+    conn.close()
+
+# Initialize DB
+init_db()
+
+# Register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+
+        # Database operations
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+
+        try:
+            # Insert new user into the database
+            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+            conn.commit()
+            # Create user folder inside /master
+            user_folder = os.path.join('master', username)
+            os.makedirs(user_folder)
+            # Copy sample scripts into the new user folder
+            subprocess.run(['cp', 'scripts/sample_script.py', user_folder])
+            flash(f'User {username} registered successfully. Please log in.', 'success')
+            return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            flash('Username already taken. Try another.', 'danger')
+        finally:
+            conn.close()
+
+    return render_template('register.html')
+
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Fetch user data from the database
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[2], password):
+            session['username'] = username
+            flash(f'Welcome, {username}!', 'success')
+            return redirect(url_for('user_home'))
+        else:
+            flash('Invalid credentials, please try again.', 'danger')
+
+    return render_template('login.html')
+
+# User home route
+@app.route('/user_home')
+def user_home():
+    if 'username' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    user_folder = os.path.join('master', username)
+
+    # List Python scripts in the user's folder
+    scripts = [f for f in os.listdir(user_folder) if f.endswith('.py')]
+
+    return render_template('user_home.html', scripts=scripts, username=username)
+
+# Execute script
+@app.route('/run-script', methods=['POST'])
+def run_script():
+    if 'username' not in session:
+        flash('You need to log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    script_name = request.form['script_name']
+    user_folder = os.path.join('master', username)
+    script_path = os.path.join(user_folder, script_name)
+
+    if os.path.exists(script_path):
+        result = subprocess.run(['python3', script_path], capture_output=True, text=True)
+        return f"<pre>{result.stdout}</pre>"
+    else:
+        flash('Script not found or access denied.', 'danger')
+        return redirect(url_for('user_home'))
+
+# Logout route
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+----------------------------------------------------------
+
+3. HTML Templates:
+templates/register.html:
+
+<h2>Register</h2>
+<form action="/register" method="post">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    
+    <input type="submit" value="Register">
+</form>
+
+--------------------------------------------------------------------
+
+templates/login.html:
+
+<h2>Login</h2>
+<form action="/login" method="post">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    
+    <input type="submit" value="Login">
+</form>
+
+-----------------------------------------------------------------------------
+
+templates/user_home.html:
+
+<h1>Welcome, {{ username }}!</h1>
+<h3>Your Scripts:</h3>
+<ul>
+    {% for script in scripts %}
+    <li>
+        <form action="/run-script" method="post" style="display:inline;">
+            <input type="hidden" name="script_name" value="{{ script }}">
+            {{ script }}
+            <input type="submit" value="Run Script">
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+
+<a href="/logout">Logout</a>
+
+------------------------------------------------------------------------------------
+
+4. Sample Script (For Testing):
+
+scripts/sample_script.py:
+
+# This is a sample script that will be copied to each user's folder
+print("Hello from your script!")
+
+
+--------------------------------------------------------------------------------
+
+5. Dockerfile
+
+# Step 1: Use an official Python runtime as a base image
+FROM python:3.9-slim
+
+# Step 2: Set the working directory inside the container
+WORKDIR /app
+
+# Step 3: Copy the current directory contents into the container at /app
+COPY . /app
+
+# Step 4: Install the required Python packages
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Step 5: Make port 5000 available to the outside world
+EXPOSE 5000
+
+# Step 6: Define the command to run the Flask app
+CMD ["python3", "app.py"]
+
+------------------------------------------------------------------------------------
+
+6. requirements.txt:
+
+Flask==2.0.1
+#  sqlite3
+werkzeug==2.0.1
+
+--------------------------------------------------------------------------------
+
+7. Building and Running Docker Container:
+
+  1. Build the Docker image:
+   # docker build -t flask-app .
+  2. Run the Docker container:
+   # docker run -d -p 5000:5000 flask-app
+
+----------------------------------------------------------------------------------
+
+8. Functionality Overview:
+
+Registration: Users register, and a folder with their username is created under /master. A sample Python script is copied into their folder.
+Login: Users log in using their username and password.
+User-Specific UI: After logging in, users can see and execute Python scripts stored in their own folder.
+
+Session Management: Sessions handle login/logout. After logout, the session data is cleared.
+This setup meets your requirements by dynamically creating folders for each user upon registration, restricting access to their respective folders, 
+and handling session-based security with Docker containerization.
+
+-----------------------------------------------------------------------------------------
+
+issue with dockerfile Error : 
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. 
+It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[notice] A new release of pip is available: 23.0.1 -> 24.2
+[notice] To update, run: pip install --upgrade pip
+
+
+---------------
+
+when i run container on 5000 thousand and access it throuws an error   Not Found
+The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.  
+what is the problem with the code and script or docker file 
+
+-->
+The error message "Not Found" typically indicates that the Flask app has not properly set up the route you are trying to access. 
+This could be related to either the code inside app.py or how the container is configured.
+
+Here’s a step-by-step guide to troubleshoot:
+
+1. Check app.py
+Make sure that your Flask app has defined the correct route, especially for the root URL / and others. Here is an example of how your app.py should look:
+Sample app.py
+
+
+-->
+
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+import os
+
+app = Flask(__name__)
+app.secret_key = 'supersecretkey'
+
+# Root route
+@app.route('/')
+def home():
+    return render_template('register.html')
+
+# Registration route
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Simulate saving to a database and creating folder for user
+        os.makedirs(f'./users/{username}', exist_ok=True)
+        
+        # Add executable scripts into the user folder
+        with open(f'./users/{username}/1.py', 'w') as f:
+            f.write('print("Script 1 executed!")')
+        
+        session['username'] = username
+        return redirect(url_for('dashboard'))
+    return render_template('register.html')
+
+# Login route
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        session['username'] = username
+        return redirect(url_for('dashboard'))
+    return render_template('login.html')
+
+# User dashboard
+@app.route('/dashboard')
+def dashboard():
+    username = session.get('username')
+    if username:
+        return f'Welcome, {username}. Your folder is ready!'
+    return redirect(url_for('login'))
+
+# Run a script inside the user's folder
+@app.route('/run/<script_name>')
+def run_script(script_name):
+    username = session.get('username')
+    if username:
+        script_path = f'./users/{username}/{script_name}.py'
+        if os.path.exists(script_path):
+            return f'Script {script_name}.py executed for {username}!'
+        return 'Script not found', 404
+    return redirect(url_for('login'))
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
+
+
+-----------------------------------------------------
+
+Ensure that you have routes for /, /register, /login, /dashboard, and other routes you might access.
+The app.run(host='0.0.0.0', port=5000) line is important for Docker to expose the app to external connections (localhost and port 5000).
+2. Check Dockerfile
+Your Dockerfile should work fine if you used the previous example. Just make sure that the COPY command correctly places your app.py and other files in the container's working directory.
+
+Here’s a final check:
+
+Sample Dockerfile
+
+
+# Step 1: Use an official Python runtime as a base image
+FROM python:3.9-slim
+
+# Step 2: Set the working directory inside the container
+WORKDIR /app
+
+# Step 3: Copy the current directory contents into the container at /app
+COPY . /app
+
+# Step 4: Install the required Python packages
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Step 5: Make port 5000 available to the outside world
+EXPOSE 5000
+
+# Step 6: Define the command to run the Flask app
+CMD ["python3", "app.py"]
+
+---------------------------------------------------------------------------------
+
+3. Verify File Structure
+Ensure that all the necessary files (like app.py, templates/register.html, templates/login.html) are present in the same directory as the Dockerfile.
+
+Your directory structure should look like this:
+
+
+.
+├── Dockerfile
+├── app.py
+├── requirements.txt
+├── templates
+│   ├── register.html
+│   ├── login.html
+└── users
+    ├── (user folders created dynamically)
+
+
+--------------------------------------------------------------------
+
+***   New Updated Problem Statement  ***
+
+when  i access 5000 i get the ui of login page but i want to access first the registeration page  then i will go for the login page because 
+firstly i have to create my userid and password on registeration page then it will create  folder for me then i will redirect to the login page 
+then i will login to this using userid and password . can you give me the ui options to switch on the pages like register to login and login to userhome
+i can swithc between  there should be the buttons to switch  on to this pages.
+
+==>
+
+
+To give you the functionality to switch between the registration and login pages with buttons, you need to make the following changes:
+
+Add buttons to switch between pages (login and registration) on the front-end (HTML templates).
+Ensure proper redirection after user registration.
+Here’s how you can adjust the logic and add buttons:
+
+1. Update the Login and Registration Pages with Buttons
+register.html (Registration Page)
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <form action="{{ url_for('register') }}" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Register</button>
+    </form>
+    <br>
+    <p>Already have an account? <a href="{{ url_for('login') }}">Login Here</a></p>
+</body>
+</html>
+
+-----------------------------------------------------------------------------------------
+
+login.html (Login Page)
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form action="{{ url_for('login') }}" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Login</button>
+    </form>
+    <br>
+    <p>Don't have an account? <a href="{{ url_for('register') }}">Register Here</a></p>
+</body>
+</html>
+
+----------------------------------------------------------------------------------------
+
+2. Redirect to Login after Successful Registration
+In your app.py, you’re already redirecting to the login page after registration, which is correct. However, ensure this flow is working as expected:
+
+# Register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+
+        # Database operations
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+
+        try:
+            # Insert new user into the database
+            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+            conn.commit()
+            # Create user folder inside /master
+            user_folder = os.path.join('master', username)
+            os.makedirs(user_folder)
+            # Copy sample scripts into the new user folder
+            subprocess.run(['cp', 'scripts/sample_script.py', user_folder])
+            flash(f'User {username} registered successfully. Please log in.', 'success')
+            return redirect(url_for('login'))  # Redirect to login after registration
+        except sqlite3.IntegrityError:
+            flash('Username already taken. Try another.', 'danger')
+        finally:
+            conn.close()
+
+    return render_template('register.html')
+
+-----------------------------------------------------------------------------
+
+3. Modify the User Home Page (user_home.html)
+This page will list available scripts and provide the option to log out.
+
+user_home.html (User Home Page)
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home</title>
+</head>
+<body>
+    <h2>Welcome, {{ username }}</h2>
+    
+    <h3>Your Available Scripts:</h3>
+    <ul>
+        {% for script in scripts %}
+            <li>
+                <form action="{{ url_for('run_script') }}" method="POST">
+                    <input type="hidden" name="script_name" value="{{ script }}">
+                    <button type="submit">{{ script }}</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <form action="{{ url_for('logout') }}" method="GET">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>
+
+--------------------------------------------------------------------------------
+
+4. Run and Test the Flow
+Start by visiting the registration page: http://localhost:5000/register.
+After registration, you’ll be redirected to the login page where you can log in using the newly created credentials.
+Once logged in, you will see the user home page with available scripts listed, along with the option to log out.
+This should allow you to switch between the registration, login, and user home pages seamlessly using buttons and links.
+
+--------------------------------------------------------------------------------
+================================================================================
+
+Here’s the updated app.py with the necessary changes. I added the logic to properly redirect after successful registration and ensured the functionality
+for navigating between registration and login pages is intact.
+
+==>
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+import os
+import sqlite3
+import subprocess
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Ensure master folder exists
+if not os.path.exists('master'):
+    os.makedirs('master')
+
+# Database setup function
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      username TEXT NOT NULL UNIQUE,
+                      password TEXT NOT NULL)''')
+    conn.commit()
+    conn.close()
+
+# Initialize DB
+init_db()
+
+# Default route - redirect to the registration page first
+@app.route('/')
+def index():
+    return redirect(url_for('register'))  # Redirect to registration by default
+
+# Register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+
+        # Database operations
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+
+        try:
+            # Insert new user into the database
+            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+            conn.commit()
+            # Create user folder inside /master
+            user_folder = os.path.join('master', username)
+            os.makedirs(user_folder)
+            # Copy sample scripts into the new user folder
+            subprocess.run(['cp', 'scripts/sample_script.py', user_folder])
+            flash(f'User {username} registered successfully. Please log in.', 'success')
+            return redirect(url_for('login'))  # Redirect to login after successful registration
+        except sqlite3.IntegrityError:
+            flash('Username already taken. Try another.', 'danger')
+        finally:
+            conn.close()
+
+    return render_template('register.html')
+
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Fetch user data from the database
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[2], password):
+            session['username'] = username
+            flash(f'Welcome, {username}!', 'success')
+            return redirect(url_for('user_home'))
+        else:
+            flash('Invalid credentials, please try again.', 'danger')
+
+    return render_template('login.html')
+
+# User home route
+@app.route('/user_home')
+def user_home():
+    if 'username' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    user_folder = os.path.join('master', username)
+
+    # List Python scripts in the user's folder
+    scripts = [f for f in os.listdir(user_folder) if f.endswith('.py')]
+
+    return render_template('user_home.html', scripts=scripts, username=username)
+
+# Execute script
+@app.route('/run-script', methods=['POST'])
+def run_script():
+    if 'username' not in session:
+        flash('You need to log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    script_name = request.form['script_name']
+    user_folder = os.path.join('master', username)
+    script_path = os.path.join(user_folder, script_name)
+
+    if os.path.exists(script_path):
+        result = subprocess.run(['python3', script_path], capture_output=True, text=True)
+        return f"<pre>{result.stdout}</pre>"
+    else:
+        flash('Script not found or access denied.', 'danger')
+        return redirect(url_for('user_home'))
+
+# Logout route
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+
+--------------------------------------------------------------------------------------------------
+
+Key Changes:
+Default route (/) now redirects to the registration page so that the first page the user sees is the registration page.
+After successful registration, the user is redirected to the login page.
+Button links are already in the HTML templates (login.html and register.html), allowing easy navigation between the registration and login pages.
+You can now visit the registration page by default and easily switch to the login page after registration using the provided link/button. Let me know if this works!
+
+====================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
