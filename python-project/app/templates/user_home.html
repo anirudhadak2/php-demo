@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home</title>
+</head>
+<body>
+    <h2>Welcome, {{ username }}</h2>
+    
+    <h3>Your Available Scripts:</h3>
+    <ul>
+        {% for script in scripts %}
+            <li>
+                <form action="{{ url_for('run_script') }}" method="POST">
+                    <input type="hidden" name="script_name" value="{{ script }}">
+                    <button type="submit">{{ script }}</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <form action="{{ url_for('logout') }}" method="GET">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>
