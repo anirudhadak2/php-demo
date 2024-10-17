@@ -1,0 +1,1123 @@
+*** Problem Statement ***
+create four folders  
+one master folder -- four sub folder  amit  , anirudha , saurabh , mahesh
+in one  master folder - 4 folder are there 
+i have created four folder like anirudh amit saurabh  mahesh 
+i want to give  suppose the amit folder can  access by the only a 
+particular user  no other user can access it.  on my website  how can i implement it
+how can i implement sessions for that 
+i want to implement a proper access control so only the particular user can access that one particular folder content
+other users can't access the other folder  , users get restrictions to access other user folders 
+In that folder there are python scripts are there , all scripts are executable 
+if user call 1.py script  he can see the 1.py content , if he call 2.py he can see the 2.py script content. how can i implement this 
+give me  options for this in  UI , the first option will call to the 1.py that script present in the particular folder that will run , then whatever output will come
+that user can able to see on the website 
+
+---------------------------------------------------------------------------------------------------
+
+
+give me one script for all of this  
+ in master folder insert the python script 
+in that master folder there are sub folders like amit anirudha saurabh mahesh
+run this scrip on that folder on localhost 5000 
+the script will get execute 
+in  every folder add content like 1.txt , 2.txt 3.txt 
+login every user and check out they can able to access the that particular folder  content
+
+
+# Change ownership for Anirudh's folder
+sudo chown -R anirudh:anirudh  anirudh
+sudo chmod 700  anirudh
+
+# Change ownership for Amit's folder
+sudo chown -R amit:amit  amit
+sudo chmod 700  amit
+
+# Repeat for other users (Saurabh and Mahesh)
+sudo chown -R saurabh:saurabh  saurabh
+sudo chmod 700  saurabh
+
+sudo chown -R mahesh:mahesh  mahesh
+sudo chmod 700  mahesh
+------------------------------------------------------------------
+controlplane $ sudo chown -R your-username:your-group anirudh
+chown: invalid user: ‘your-username:your-group’
+controlplane $ sudo chown -R your-username:your-group amit
+chown: invalid user: ‘your-userna8me:your-group’
+controlplane $ sudo chmod 700 anirudh
+controlplane $ sudo chmod 700 amit
+
+================================================================
+======================================================================
+
+
+controlplane $ mkdir app
+controlplane $ cd app
+controlplane $ app.py
+app.py: command not found
+controlplane $ vi app.py
+controlplane $ mkdir templates
+controlplane $ cd templates
+controlplane $ cd ..
+controlplane $ pwd
+/root/app
+controlplane $ vi templates/register.html
+controlplane $ vi templates/login.html
+controlplane $ vi templates/user_home.html
+controlplane $ vi templates/user_home.html
+controlplane $ mkdir scripts
+controlplane $ vi scripts/sample_script.py
+controlplane $ vi Dockerfile
+controlplane $ vi requirements.txt
+controlplane $ docker build -t flask-app .
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon   12.8kB
+Step 1/6 : FROM python:3.9-slim
+
+3.9-slim: Pulling from library/python
+302e3ee49805: Pull complete 
+4c0965d39195: Pull complete 
+fdeeec85abba: Pull complete 
+62a08b8dd4f5: Pull complete 
+Digest: sha256:49f94609e5a997dc16086a66ac9664591854031d48e375945a9dbf4d1d53abbc
+Status: Downloaded newer image for python:3.9-slim
+ ---> 9d8cb7037cd8
+Step 2/6 : WORKDIR /app
+ ---> Running in a8e1872dd23c
+Removing intermediate container a8e1872dd23c
+ ---> bfada395da55
+Step 3/6 : COPY . /app
+ ---> 7818479b918c
+Step 4/6 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Running in dc053f19c7a9
+Collecting Flask==2.0.1
+  Downloading Flask-2.0.1-py3-none-any.whl (94 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 94.8/94.8 kB 6.1 MB/s eta 0:00:00
+ERROR: Could not find a version that satisfies the requirement sqlite3 (from versions: none)
+ERROR: No matching distribution found for sqlite3
+
+[notice] A new release of pip is available: 23.0.1 -> 24.2
+[notice] To update, run: pip install --upgrade pip
+The command '/bin/sh -c pip install --no-cache-dir -r requirements.txt' returned a non-zero code: 1
+controlplane $ 
+controlplane $ cat Dockerfile
+# Step 1: Use an official Python runtime as a base image
+FROM python:3.9-slim
+
+# Step 2: Set the working directory inside the container
+WORKDIR /app
+
+# Step 3: Copy the current directory contents into the container at /app
+COPY . /app
+
+# Step 4: Install the required Python packages
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Step 5: Make port 5000 available to the outside world
+EXPOSE 5000
+
+# Step 6: Define the command to run the Flask app
+CMD ["python3", "app.py"]
+
+controlplane $ cat requirements.txt
+Flask==2.0.1
+sqlite3
+werkzeug==2.0.1
+
+controlplane $ vi requirements.txt
+controlplane $ docker build -t flask-app .
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon   12.8kB
+Step 1/6 : FROM python:3.9-slim
+ ---> 9d8cb7037cd8
+Step 2/6 : WORKDIR /app
+ ---> Using cache
+ ---> bfada395da55
+Step 3/6 : COPY . /app
+ ---> 7545d948cfa7
+Step 4/6 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Running in 5fdaf4b259f2
+Collecting Flask==2.0.1
+  Downloading Flask-2.0.1-py3-none-any.whl (94 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 94.8/94.8 kB 4.5 MB/s eta 0:00:00
+Collecting werkzeug==2.0.1
+  Downloading Werkzeug-2.0.1-py3-none-any.whl (288 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 288.2/288.2 kB 23.5 MB/s eta 0:00:00
+Collecting click>=7.1.2
+  Downloading click-8.1.7-py3-none-any.whl (97 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 97.9/97.9 kB 184.4 MB/s eta 0:00:00
+Collecting Jinja2>=3.0
+  Downloading jinja2-3.1.4-py3-none-any.whl (133 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 133.3/133.3 kB 110.7 MB/s eta 0:00:00
+Collecting itsdangerous>=2.0
+  Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Collecting MarkupSafe>=2.0
+  Downloading MarkupSafe-3.0.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (20 kB)
+Installing collected packages: werkzeug, MarkupSafe, itsdangerous, click, Jinja2, Flask
+Successfully installed Flask-2.0.1 Jinja2-3.1.4 MarkupSafe-3.0.1 click-8.1.7 itsdangerous-2.2.0 werkzeug-2.0.1
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 24.2
+[notice] To update, run: pip install --upgrade pip
+Removing intermediate container 5fdaf4b259f2
+ ---> f8fd8553a998
+Step 5/6 : EXPOSE 5000
+ ---> Running in 0eed1ef36d22
+Removing intermediate container 0eed1ef36d22
+ ---> 499e4c91dfc8
+Step 6/6 : CMD ["python3", "app.py"]
+ ---> Running in bac05e89dac1
+Removing intermediate container bac05e89dac1
+ ---> 866b9eba8976
+Successfully built 866b9eba8976
+Successfully tagged flask-app:latest
+controlplane $ docker images
+REPOSITORY   TAG        IMAGE ID       CREATED          SIZE
+flask-app    latest     866b9eba8976   51 seconds ago   136MB
+<none>       <none>     7818479b918c   3 minutes ago    125MB
+python       3.9-slim   9d8cb7037cd8   5 weeks ago      125MB
+controlplane $ docker run -d -p 5000:5000 flask-app
+9a9e6f5ab3e373213520ba7eb80ab623c86e57e3b6a4f6e18a1858368bb8669d
+controlplane $ docker ps
+CONTAINER ID   IMAGE       COMMAND            CREATED         STATUS         PORTS                                       NAMES
+9a9e6f5ab3e3   flask-app   "python3 app.py"   4 seconds ago   Up 3 seconds   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   interesting_turing
+controlplane $ docker ps
+CONTAINER ID   IMAGE       COMMAND            CREATED          STATUS         PORTS                                       NAMES
+9a9e6f5ab3e3   flask-app   "python3 app.py"   10 seconds ago   Up 9 seconds   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   interesting_turing
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ vi app.py
+controlplane $ cat app.py 
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+import os
+import sqlite3
+import subprocess
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Ensure master folder exists
+if not os.path.exists('master'):
+    os.makedirs('master')
+
+# Database setup function
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      username TEXT NOT NULL UNIQUE,
+                      password TEXT NOT NULL)''')
+    conn.commit()
+    conn.close()
+
+# Initialize DB
+init_db()
+
+# Register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+
+        # Database operations
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+
+        try:
+            # Insert new user into the database
+            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+            conn.commit()
+            # Create user folder inside /master
+            user_folder = os.path.join('master', username)
+            os.makedirs(user_folder)
+            # Copy sample scripts into the new user folder
+            subprocess.run(['cp', 'scripts/sample_script.py', user_folder])
+            flash(f'User {username} registered successfully. Please log in.', 'success')
+            return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            flash('Username already taken. Try another.', 'danger')
+        finally:
+            conn.close()
+
+    return render_template('register.html')
+
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Fetch user data from the database
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[2], password):
+            session['username'] = username
+            flash(f'Welcome, {username}!', 'success')
+            return redirect(url_for('user_home'))
+        else:
+            flash('Invalid credentials, please try again.', 'danger')
+
+    return render_template('login.html')
+
+# User home route
+@app.route('/user_home')
+def user_home():
+    if 'username' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    user_folder = os.path.join('master', username)
+
+    # List Python scripts in the user's folder
+    scripts = [f for f in os.listdir(user_folder) if f.endswith('.py')]
+
+    return render_template('user_home.html', scripts=scripts, username=username)
+
+# Execute script
+@app.route('/run-script', methods=['POST'])
+def run_script():
+    if 'username' not in session:
+        flash('You need to log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    script_name = request.form['script_name']
+    user_folder = os.path.join('master', username)
+    script_path = os.path.join(user_folder, script_name)
+
+    if os.path.exists(script_path):
+        result = subprocess.run(['python3', script_path], capture_output=True, text=True)
+        return f"<pre>{result.stdout}</pre>"
+    else:
+        flash('Script not found or access denied.', 'danger')
+        return redirect(url_for('user_home'))
+
+# Logout route
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ mv app.py  /mnt 
+controlplane $ ls
+Dockerfile  requirements.txt  scripts  templates
+controlplane $ vi app.py 
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ docker images
+REPOSITORY   TAG        IMAGE ID       CREATED          SIZE
+flask-app    latest     866b9eba8976   10 minutes ago   136MB
+<none>       <none>     7818479b918c   13 minutes ago   125MB
+python       3.9-slim   9d8cb7037cd8   5 weeks ago      125MB
+controlplane $ docker rmi 866b9eba8976
+Error response from daemon: conflict: unable to delete 866b9eba8976 (cannot be forced) - image is being used by running container 9a9e6f5ab3e3
+controlplane $ docker ps
+CONTAINER ID   IMAGE       COMMAND            CREATED         STATUS         PORTS                                       NAMES
+9a9e6f5ab3e3   flask-app   "python3 app.py"   9 minutes ago   Up 9 minutes   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   interesting_turing
+controlplane $ docker stop 9a9e6f5ab3e3
+docker rm  9a9e6f5ab3e3
+
+9a9e6f5ab3e3
+controlplane $ docker rm  9a9e6f5ab3e3
+9a9e6f5ab3e3
+controlplane $ 
+controlplane $ docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+controlplane $ docker ps -a 
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS                      PORTS     NAMES
+dc053f19c7a9   7818479b918c   "/bin/sh -c 'pip ins…"   13 minutes ago   Exited (1) 13 minutes ago             awesome_khorana
+controlplane $ docker rm dc053f19c7a9
+dc053f19c7a9
+controlplane $ docker rmi 7818479b918c
+Deleted: sha256:7818479b918c33d91aafb8bab6abe8a7bd893aabeab6bc98be63054e638aa5f1
+Deleted: sha256:cd2356ea58df1005ed4b04b35805e85cf4ec2a4c8646da5d67f2236e48645d09
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ docker images
+REPOSITORY   TAG        IMAGE ID       CREATED          SIZE
+flask-app    latest     866b9eba8976   11 minutes ago   136MB
+python       3.9-slim   9d8cb7037cd8   5 weeks ago      125MB
+controlplane $ docker build -t flask-app .
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  13.31kB
+Step 1/6 : FROM python:3.9-slim
+ ---> 9d8cb7037cd8
+Step 2/6 : WORKDIR /app
+ ---> Using cache
+ ---> bfada395da55
+Step 3/6 : COPY . /app
+ ---> 1d5c0f36bc82
+Step 4/6 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Running in df1f7dffdc15
+Collecting Flask==2.0.1
+  Downloading Flask-2.0.1-py3-none-any.whl (94 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 94.8/94.8 kB 3.7 MB/s eta 0:00:00
+Collecting werkzeug==2.0.1
+  Downloading Werkzeug-2.0.1-py3-none-any.whl (288 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 288.2/288.2 kB 111.4 MB/s eta 0:00:00
+Collecting itsdangerous>=2.0
+  Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Collecting click>=7.1.2
+  Downloading click-8.1.7-py3-none-any.whl (97 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 97.9/97.9 kB 92.8 MB/s eta 0:00:00
+Collecting Jinja2>=3.0
+  Downloading jinja2-3.1.4-py3-none-any.whl (133 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 133.3/133.3 kB 83.5 MB/s eta 0:00:00
+Collecting MarkupSafe>=2.0
+  Downloading MarkupSafe-3.0.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (20 kB)
+Installing collected packages: werkzeug, MarkupSafe, itsdangerous, click, Jinja2, Flask
+Successfully installed Flask-2.0.1 Jinja2-3.1.4 MarkupSafe-3.0.1 click-8.1.7 itsdangerous-2.2.0 werkzeug-2.0.1
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 24.2
+[notice] To update, run: pip install --upgrade pip
+Removing intermediate container df1f7dffdc15
+ ---> 602283b7a15e
+Step 5/6 : EXPOSE 5000
+ ---> Running in ad88313d940d
+Removing intermediate container ad88313d940d
+ ---> 3a8c5f3698c8
+Step 6/6 : CMD ["python3", "app.py"]
+ ---> Running in d1541a1af838
+Removing intermediate container d1541a1af838
+ ---> 8749fa452ea8
+Successfully built 8749fa452ea8
+Successfully tagged flask-app:latest
+controlplane $ docker run -d -p 5000:5000 flask-app
+3ac522df146688ab4a90951b60a45d53c6b662820b026d9d91e9bc78147a7d32
+controlplane $ docker ps
+CONTAINER ID   IMAGE       COMMAND            CREATED         STATUS         PORTS                                       NAMES
+3ac522df1466   flask-app   "python3 app.py"   4 seconds ago   Up 3 seconds   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   exciting_ramanujan
+controlplane $ docker ps
+CONTAINER ID   IMAGE       COMMAND            CREATED         STATUS         PORTS                                       NAMES
+3ac522df1466   flask-app   "python3 app.py"   7 seconds ago   Up 5 seconds   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   exciting_ramanujan
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ pwd
+/root/app
+controlplane $ cat app.py
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+import os
+import sqlite3
+import subprocess
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Ensure master folder exists
+if not os.path.exists('master'):
+    os.makedirs('master')
+
+# Database setup function
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      username TEXT NOT NULL UNIQUE,
+                      password TEXT NOT NULL)''')
+    conn.commit()
+    conn.close()
+
+# Initialize DB
+init_db()
+
+# Default route
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
+
+# Register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+
+        # Database operations
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+
+        try:
+            # Insert new user into the database
+            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+            conn.commit()
+            # Create user folder inside /master
+            user_folder = os.path.join('master', username)
+            os.makedirs(user_folder)
+            # Copy sample scripts into the new user folder
+            subprocess.run(['cp', 'scripts/sample_script.py', user_folder])
+            flash(f'User {username} registered successfully. Please log in.', 'success')
+            return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            flash('Username already taken. Try another.', 'danger')
+        finally:
+            conn.close()
+
+    return render_template('register.html')
+
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Fetch user data from the database
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[2], password):
+            session['username'] = username
+            flash(f'Welcome, {username}!', 'success')
+            return redirect(url_for('user_home'))
+        else:
+            flash('Invalid credentials, please try again.', 'danger')
+
+    return render_template('login.html')
+
+# User home route
+@app.route('/user_home')
+def user_home():
+    if 'username' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    user_folder = os.path.join('master', username)
+
+    # List Python scripts in the user's folder
+    scripts = [f for f in os.listdir(user_folder) if f.endswith('.py')]
+
+    return render_template('user_home.html', scripts=scripts, username=username)
+
+# Execute script
+@app.route('/run-script', methods=['POST'])
+def run_script():
+    if 'username' not in session:
+        flash('You need to log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    script_name = request.form['script_name']
+    user_folder = os.path.join('master', username)
+    script_path = os.path.join(user_folder, script_name)
+
+    if os.path.exists(script_path):
+        result = subprocess.run(['python3', script_path], capture_output=True, text=True)
+        return f"<pre>{result.stdout}</pre>"
+    else:
+        flash('Script not found or access denied.', 'danger')
+        return redirect(url_for('user_home'))
+
+# Logout route
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ cat requirements.txt
+Flask==2.0.1
+#  sqlite3
+werkzeug==2.0.1
+
+controlplane $ cd templates
+controlplane $ ls
+login.html  register.html  user_home.html
+controlplane $ cat login.html
+<h2>Login</h2>
+<form action="/login" method="post">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    
+    <input type="submit" value="Login">
+</form>
+
+controlplane $ cat register.html
+<h2>Register</h2>
+<form action="/register" method="post">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    
+    <input type="submit" value="Register">
+</form>
+
+controlplane $ cat  user_home.html
+<h1>Welcome, {{ username }}!</h1>
+<h3>Your Scripts:</h3>
+<ul>
+    {% for script in scripts %}
+    <li>
+        <form action="/run-script" method="post" style="display:inline;">
+            <input type="hidden" name="script_name" value="{{ script }}">
+            {{ script }}
+            <input type="submit" value="Run Script">
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+
+<a href="/logout">Logout</a>
+
+controlplane $ cd ..
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ cd scripts
+controlplane $ l
+sample_script.py
+controlplane $ cat sample_script.py
+# This is a sample script that will be copied to each user's folder
+print("Hello from your script!")
+
+controlplane $ cd ..
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ cat Dockerfile 
+# Step 1: Use an official Python runtime as a base image
+FROM python:3.9-slim
+
+# Step 2: Set the working directory inside the container
+WORKDIR /app
+
+# Step 3: Copy the current directory contents into the container at /app
+COPY . /app
+
+# Step 4: Install the required Python packages
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Step 5: Make port 5000 available to the outside world
+EXPOSE 5000
+
+# Step 6: Define the command to run the Flask app
+CMD ["python3", "app.py"]
+
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ pwd
+/root/app
+controlplane $ history 
+    1  apt-get update
+    2  halt
+    3  FILE=/ks/wait-background.sh; while ! test -f ${FILE}; do clear; sleep 0.1; done; bash ${FILE}
+    4  mkdir app
+    5  cd app
+    6  app.py
+    7  vi app.py
+    8  mkdir templates
+    9  cd templates
+   10  cd ..
+   11  pwd
+   12  vi templates/register.html
+   13  vi templates/login.html
+   14  vi templates/user_home.html
+   15  mkdir scripts
+   16  vi scripts/sample_script.py
+   17  vi Dockerfile
+   18  vi requirements.txt
+   19  docker build -t flask-app .
+   20  cat Dockerfile
+   21  cat requirements.txt
+   22  vi requirements.txt
+   23  docker build -t flask-app .
+   24  docker images
+   25  docker run -d -p 5000:5000 flask-app
+   26  docker ps
+   27  docker
+   28  docker ps
+   29  ls
+   30  vi app.py
+   31  cat app.py 
+   32  ls
+   33  mv app.py  /mnt 
+   34  ls
+   35* vi app.py d
+   36  ls
+   37  docker images
+   38  docker rmi 866b9eba8976
+   39  docker ps
+   40  docker stop 9a9e6f5ab3e3
+   41  docker rm  9a9e6f5ab3e3
+   42  docker ps
+   43  docker ps -a 
+   44  docker rm dc053f19c7a9
+   45  docker rmi 7818479b918c
+   46  ls
+   47  docker images
+   48  docker build -t flask-app .
+   49  docker run -d -p 5000:5000 flask-app
+   50  docker ps
+   51  ls
+   52  pwd
+   53  cat app.py
+   54  ls
+   55  cat requirements.txt
+   56  cd templates
+   57  ls
+   58  cat login.html
+   59  cat register.html
+   60  cat  user_home.html
+   61  cd ..
+   62  ls
+   63  cd scripts
+   64  l
+   65  cat sample_script.py
+   66  cd ..
+   67  ls
+   68  cat Dockerfile 
+   69  ls
+   70  pwd
+   71  history 
+controlplane $ 
+
+==========================================================================================
+==========================================================================================
+==========================================================================================
+
+root@89dc9e3d6ea2:/app/master/lords# ls
+sample_script.py
+root@89dc9e3d6ea2:/app/master/lords# vi test.py
+bash: vi: command not found
+root@89dc9e3d6ea2:/app/master/lords# pwd
+/app/master/lords
+root@89dc9e3d6ea2:/app/master/lords# exit 
+exit
+controlplane $ ls
+Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ vi 1.py   
+controlplane $ ls
+1.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ docker ps      
+CONTAINER ID   IMAGE       COMMAND            CREATED          STATUS          PORTS                                       NAMES
+89dc9e3d6ea2   flask-app   "python3 app.py"   12 minutes ago   Up 12 minutes   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   focused_sinoussi
+controlplane $ docker cp 1.py 89dc9e3d6ea2:/app/master/lords 
+Successfully copied 14.3kB to 89dc9e3d6ea2:/app/master/lords
+controlplane $ ls
+1.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ docker ps
+CONTAINER ID   IMAGE       COMMAND            CREATED          STATUS          PORTS                                       NAMES
+89dc9e3d6ea2   flask-app   "python3 app.py"   13 minutes ago   Up 13 minutes   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   focused_sinoussi
+controlplane $ docker exec -it 89dc9e3d6ea2 bash
+root@89dc9e3d6ea2:/app# ls
+Dockerfile  app.py  master  requirements.txt  scripts  templates  users.db
+root@89dc9e3d6ea2:/app# cd master
+root@89dc9e3d6ea2:/app/master# ls
+anirudha  lords
+root@89dc9e3d6ea2:/app/master# cd lords
+root@89dc9e3d6ea2:/app/master/lords# ls
+1.py  sample_script.py
+root@89dc9e3d6ea2:/app/master/lords# ls
+1.py  sample_script.py
+root@89dc9e3d6ea2:/app/master/lords# exit
+exit
+controlplane $ ls
+1.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ ls
+1.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ cat app.py
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+import os
+import sqlite3
+import subprocess
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Ensure master folder exists
+if not os.path.exists('master'):
+    os.makedirs('master')
+
+# Database setup function
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      username TEXT NOT NULL UNIQUE,
+                      password TEXT NOT NULL)''')
+    conn.commit()
+    conn.close()
+
+# Initialize DB
+init_db()
+
+# Default route - redirect to the registration page first
+@app.route('/')
+def index():
+    return redirect(url_for('register'))  # Redirect to registration by default
+
+# Register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+
+        # Database operations
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+
+        try:
+            # Insert new user into the database
+            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+            conn.commit()
+            # Create user folder inside /master
+            user_folder = os.path.join('master', username)
+            os.makedirs(user_folder)
+            # Copy sample scripts into the new user folder
+            subprocess.run(['cp', 'scripts/sample_script.py', user_folder])
+            flash(f'User {username} registered successfully. Please log in.', 'success')
+            return redirect(url_for('login'))  # Redirect to login after successful registration
+        except sqlite3.IntegrityError:
+            flash('Username already taken. Try another.', 'danger')
+        finally:
+            conn.close()
+
+    return render_template('register.html')
+
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Fetch user data from the database
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[2], password):
+            session['username'] = username
+            flash(f'Welcome, {username}!', 'success')
+            return redirect(url_for('user_home'))
+        else:
+            flash('Invalid credentials, please try again.', 'danger')
+
+    return render_template('login.html')
+
+# User home route
+@app.route('/user_home')
+def user_home():
+    if 'username' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    user_folder = os.path.join('master', username)
+
+    # List Python scripts in the user's folder
+    scripts = [f for f in os.listdir(user_folder) if f.endswith('.py')]
+
+    return render_template('user_home.html', scripts=scripts, username=username)
+
+# Execute script
+@app.route('/run-script', methods=['POST'])
+def run_script():
+    if 'username' not in session:
+        flash('You need to log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session['username']
+    script_name = request.form['script_name']
+    user_folder = os.path.join('master', username)
+    script_path = os.path.join(user_folder, script_name)
+
+    if os.path.exists(script_path):
+        result = subprocess.run(['python3', script_path], capture_output=True, text=True)
+        return f"<pre>{result.stdout}</pre>"
+    else:
+        flash('Script not found or access denied.', 'danger')
+        return redirect(url_for('user_home'))
+
+# Logout route
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+controlplane $ ls 
+1.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ cat requirements.txt
+Flask==2.0.1
+#  sqlite3
+werkzeug==2.0.1
+controlplane $ cd templates
+controlplane $ ls
+login.html  register.html  user_home.html
+controlplane $ cat login.html 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form action="{{ url_for('login') }}" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Login</button>
+    </form>
+    <br>
+    <p>Don't have an account? <a href="{{ url_for('register') }}">Register Here</a></p>
+</body>
+</html>
+
+controlplane $ cat register.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <form action="{{ url_for('register') }}" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Register</button>
+    </form>
+    <br>
+    <p>Already have an account? <a href="{{ url_for('login') }}">Login Here</a></p>
+</body>
+</html>
+
+controlplane $ cat user_home.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home</title>
+</head>
+<body>
+    <h2>Welcome, {{ username }}</h2>
+    
+    <h3>Your Available Scripts:</h3>
+    <ul>
+        {% for script in scripts %}
+            <li>
+                <form action="{{ url_for('run_script') }}" method="POST">
+                    <input type="hidden" name="script_name" value="{{ script }}">
+                    <button type="submit">{{ script }}</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <form action="{{ url_for('logout') }}" method="GET">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>
+
+controlplane $ ls
+login.html  register.html  user_home.html
+controlplane $ cd ..
+controlplane $ ls
+1.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ cd scripts
+controlplane $ ls
+sample_script.py
+controlplane $ cat sample_script.py 
+# This is a sample script that will be copied to each user's folder
+print("Hello from your script!")
+
+controlplane $ ls
+sample_script.py
+controlplane $ cd ..
+controlplane $ ls
+1.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ vi 2.py 
+controlplane $ docker ps
+CONTAINER ID   IMAGE       COMMAND            CREATED          STATUS          PORTS                                       NAMES
+89dc9e3d6ea2   flask-app   "python3 app.py"   19 minutes ago   Up 19 minutes   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   focused_sinoussi
+controlplane $ docker cp 2.py 89dc9e3d6ea2:/app/master/lords
+Successfully copied 6.14kB to 89dc9e3d6ea2:/app/master/lords
+controlplane $ docker exec -it 89dc9e3d6ea2 bash 
+root@89dc9e3d6ea2:/app# cd /app/master/lords
+root@89dc9e3d6ea2:/app/master/lords# ls
+1.py  2.py  sample_script.py
+root@89dc9e3d6ea2:/app/master/lords# exit
+exit
+controlplane $ ls
+1.py  2.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ cd scripts
+controlplane $ ls
+sample_script.py
+controlplane $ cat sample_script.py
+# This is a sample script that will be copied to each user's folder
+print("Hello from your script!")
+
+controlplane $ cd ..
+controlplane $ ls
+1.py  2.py  Dockerfile  app.py  requirements.txt  scripts  templates
+controlplane $ cat Dockerfile
+# Step 1: Use an official Python runtime as a base image
+FROM python:3.9-slim
+
+# Step 2: Set the working directory inside the container
+WORKDIR /app
+
+# Step 3: Copy the current directory contents into the container at /app
+COPY . /app
+
+# Step 4: Install the required Python packages
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Step 5: Make port 5000 available to the outside world
+EXPOSE 5000
+
+# Step 6: Define the command to run the Flask app
+CMD ["python3", "app.py"]
+controlplane $ history 
+    1  apt-get update
+    2  halt
+    3  FILE=/ks/wait-background.sh; while ! test -f ${FILE}; do clear; sleep 0.1; done; bash ${FILE}
+    4  mkdir app
+    5  cd app
+    6  ls
+    7  vi app.py 
+    8  mkdir  templates
+    9  vi requirements.txt
+   10  mkdir scripts
+   11  cd scripts
+   12  vi sample_script.py
+   13  pwd
+   14  cd ..
+   15  pwd
+   16  ls
+   17  cd templates
+   18  ls
+   19  vi register.html
+   20  vi login.html
+   21  vi user_home.html
+   22  ls
+   23  cd ..
+   24  ls
+   25  cat app.py
+   26  ls
+   27  mv app.py /mnt
+   28  ls
+   29  vi app.py 
+   30  ls
+   31  vi  Dockerfile 
+   32  ls
+   33  docker build -t flask-app .
+   34  docker images
+   35  ls
+   36  docker run -d -p 5000:5000 flask-app
+   37  docker ps
+   38  ls
+   39  cd scripts
+   40  ls
+   41  cd ..
+   42  docker ps
+   43  docker exec -it 89dc9e3d6ea2 bash 
+   44  ls
+   45  vi 1.py 
+   46  ls
+   47  docker ps
+   48  docker cp 1.py 89dc9e3d6ea2:/app/master/lords 
+   49  ls
+   50  docker ps
+   51  docker exec -it 89dc9e3d6ea2 bash
+   52  ls
+   53  cat app.py
+   54  ls
+   55  cat requirements.txt
+   56  cd templates
+   57  ls
+   58  cat login.html 
+   59  cat register.html
+   60  cat user_home.html
+   61  ls
+   62  cd ..
+   63  ls
+   64  cd scripts
+   65  ls
+   66  cat sample_script.py 
+   67  ls
+   68  cd ..
+   69  ls
+   70  vi 2.py 
+   71  docker ps
+   72  docker cp 2.py 89dc9e3d6ea2:/app/master/lords
+   73  docker exec -it 89dc9e3d6ea2 bash 
+   74  ls
+   75  cd scripts
+   76  ls
+   77  cat sample_script.py
+   78  cd ..
+   79  ls
+   80  cat Dockerfile
+   81  history 
+--------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
