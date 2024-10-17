@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php
+  template:
+    metadata:
+      labels:
+        app: php
+    spec:
+      containers:
+        - name: php-app
+          image:  anirudhadak2/test:php-app      # php-app:latest  # Update with your actual image
+          env:
+            - name: DB_HOST
+              value: "mysql-db"  # Use the MySQL service name
+            - name: DB_NAME
+              value: "users_db"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              value: "rootpassword"
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-app
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30000  # Choose a node port (between 30000-32767)
+  selector:
+    app: php
