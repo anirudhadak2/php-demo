@@ -1,0 +1,560 @@
+*** Problem Statement ***
+
+here is the all files that required for the run to the  php application and but i am facing on issue is that when the i run this php aaplication and try to access
+it over the 5000 port no at that time it gives an databases connection error to resolve this error their require the databases connection like mysql database, 
+so i suggest that can you make the database connection of mysql resolve this but to store the user databases like username password  can we store the database
+to the mysql container so how to make connection of the databases to the php application so here i want the things are like all the codes scripts 
+like app.php templates scripts and dockerfiles for the both php and mysql for the proper implementation like when the user is make regiseration on register page  
+in the master folder that user name folder has to be create and only that one user has the access other will get restriction to use it and that 
+userid passwd will stored in the database of the mysql container., when the will do registeration he will redierect to the login page the after login he will redirect
+to the his home dire folder to called php scripts where the scripts are presents and i want the ui for this webpages like register login and home user 
+and user can able to switch the pages like login to register regitser to login and then home user to call php scripts.
+so give me the all implementation details with the scripts code dockerfils templates all the things.
+
+Use This Scripts for this implementation : 
+====>
+controlplane $ cat Dockerfile 
+# Step 1: Use an official PHP runtime as a base image
+FROM php:7.4-cli
+# Step 2: Install necessary extensions (PDO MySQL)
+RUN apt-get update && apt-get install -y \
+    default-mysql-client \
+    && docker-php-ext-install pdo pdo_mysql
+
+# Step 3: Set the working directory inside the container
+WORKDIR /app
+# Step 4: Copy the current directory contents into the container at /app
+COPY . /app
+
+# Step 5: Expose port 5000
+EXPOSE 5000
+# Step 6: Start PHP's built-in server
+CMD ["php", "-S", "0.0.0.0:5000", "app.php"]
+
+--------------------------------------------
+controlplane $ ls scripts/
+sample_script.php
+controlplane $ ls templates/
+login.php  register.php  user_home.php
+controlplane $ cat scripts/sample_script.php
+<?php
+echo "Hello from your PHP script!";
+?>
+
+controlplane $ cat templates/login.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form action="/login" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit" name="login">Login</button>
+    </form>
+    <br>
+    <p>New user? <a href="/register">Register Here</a></p>
+</body>
+</html>
+----------------------------------------------------
+controlplane $ cat templates/register.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <form action="/register" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit" name="register">Register</button>
+    </form>
+    <br>
+    <p>Already have an account? <a href="/login">Login Here</a></p>
+</body>
+</html>
+--------------------------------------------------------------------
+controlplane $ cat templates/user_home.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home</title>
+</head>
+<body>
+    <h2>Welcome, <?php echo $username; ?></h2>
+    
+    <h3>Your Available Scripts:</h3>
+    <ul>
+        <?php foreach ($scripts as $script): ?>
+            <li>
+                <form action="/user_home" method="POST">
+                    <input type="hidden" name="script_name" value="<?php echo $script; ?>">
+                    <button type="submit" name="run_script"><?php echo $script; ?></button>
+                </form>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+
+    <br>
+    <form action="/logout" method="GET">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>
+----------------------------------------------
+controlplane $ ls
+Dockerfile  app.php  docker-compose.yml  dockerfile  dockerfile1  scripts  templates
+controlplane $ cat app.php 
+<?php
+session_start();
+
+// Database configuration from environment variables
+$host = getenv('DB_HOST') ?: 'mysql-db';  // Use the service name of the MySQL container
+$dbname = getenv('DB_NAME') ?: 'users_db';
+$username_db = getenv('DB_USER') ?: 'root';
+$password_db = getenv('DB_PASSWORD') ?: 'rootpassword';
+
+// Connect to MySQL database
+try {
+    // Use the MySQL service name (e.g., 'mysql-db') to connect
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username_db, $password_db);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Create the users table if it doesn't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    )");
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
+// Ensure master folder exists
+if (!is_dir('master')) {
+    mkdir('master', 0777, true);
+}
+
+// Handle registration
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+    // Check if username already exists
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        echo "<p>Username already taken. Try another.</p>";
+    } else {
+        // Insert new user into the database
+        $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        $stmt->execute([$username, $password]);
+
+        // Create user folder inside /master
+        $user_folder = "master/$username";
+        mkdir($user_folder);
+
+        // Copy sample script into user's folder
+        copy("scripts/sample_script.php", "$user_folder/sample_script.php");
+
+        echo "<p>User $username registered successfully. Please log in.</p>";
+    }
+}
+
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Fetch user from database
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['username'] = $username;
+        header("Location: /user_home");
+        exit();
+    } else {
+        echo "<p>Invalid credentials. Please try again.</p>";
+    }
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: /login");
+    exit();
+}
+
+// Display user home
+if (isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
+    $user_folder = "master/$username";
+
+    // List PHP scripts in the user's folder
+    if (is_dir($user_folder)) {
+        $scripts = array_filter(scandir($user_folder), function ($file) {
+            return pathinfo($file, PATHINFO_EXTENSION) === 'php';
+        });
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['run_script'])) {
+        $script_name = $_POST['script_name'];
+        $script_path = "$user_folder/$script_name";
+
+        if (file_exists($script_path)) {
+            ob_start();
+            include($script_path);
+            $output = ob_get_clean();
+            echo "<pre>$output</pre>";
+        } else {
+            echo "<p>Script not found or access denied.</p>";
+        }
+    }
+
+    echo "<h1>Welcome, $username!</h1>";
+    echo "<h2>Your scripts:</h2>";
+    foreach ($scripts as $script) {
+        echo "<form method='POST'>
+                <input type='hidden' name='script_name' value='$script'>
+                <button type='submit' name='run_script'>Run $script</button>
+              </form><br>";
+    }
+    echo "<a href='?logout'>Logout</a>";
+    exit();
+}
+
+// Display registration form
+if (!isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/register') {
+    include('templates/register.php');
+}
+
+// Display login form
+if (!isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/login') {
+    include('templates/login.php');
+}
+?>
+=================================================>
+=================================>
+
+Based on your requirements, I will provide you with a complete solution to implement a PHP application that connects to a MySQL container.
+This application will allow users to register and log in, with each user's scripts stored in their own directory, ensuring that they have access to only their files.
+Below is the complete setup, including Dockerfiles, PHP scripts, and templates.
+
+Directory Structure
+Here’s how your directory structure will look:
+
+your_project/
+│
+├── docker-compose.yml
+├── Dockerfile
+├── app.php
+│
+├── scripts/
+│   └── sample_script.php
+│
+├── templates/
+│   ├── login.php
+│   ├── register.php
+│   └── user_home.php
+│
+└── dockerfile
+
+---------------------------------------------------
+
+1. Dockerfile for PHP Application
+Dockerfile:
+
+# Step 1: Use an official PHP runtime as a base image
+FROM php:7.4-cli
+
+# Step 2: Install necessary extensions (PDO MySQL)
+RUN apt-get update && apt-get install -y \
+    default-mysql-client \
+    && docker-php-ext-install pdo pdo_mysql
+
+# Step 3: Set the working directory inside the container
+WORKDIR /app
+
+# Step 4: Copy the current directory contents into the container at /app
+COPY . /app
+
+# Step 5: Expose port 5000
+EXPOSE 5000
+
+# Step 6: Start PHP's built-in server
+CMD ["php", "-S", "0.0.0.0:5000", "app.php"]
+
+--------------------------------------------------------------------------
+
+2. Dockerfile for MySQL Database  (Not in use , not successful database connection.)
+
+# Use official MySQL image
+FROM mysql:5.7
+
+# Set environment variables
+ENV MYSQL_ROOT_PASSWORD=rootpassword
+ENV MYSQL_DATABASE=users_db
+
+# Expose the MySQL port
+EXPOSE 3306
+
+-------------------------------------------------------------------------
+
+4. app.php
+
+<?php
+session_start();
+
+// Database configuration from environment variables
+$host = getenv('DB_HOST') ?: 'mysql-db';
+$dbname = getenv('DB_NAME') ?: 'users_db';
+$username_db = getenv('DB_USER') ?: 'root';
+$password_db = getenv('DB_PASSWORD') ?: 'rootpassword';
+
+// Connect to MySQL database
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username_db, $password_db);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Create the users table if it doesn't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    )");
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
+// Ensure master folder exists
+if (!is_dir('master')) {
+    mkdir('master', 0777, true);
+}
+
+// Handle registration
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+    // Check if username already exists
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        echo "<p>Username already taken. Try another.</p>";
+    } else {
+        // Insert new user into the database
+        $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        $stmt->execute([$username, $password]);
+
+        // Create user folder inside /master
+        $user_folder = "master/$username";
+        mkdir($user_folder);
+
+        // Copy sample script into user's folder
+        copy("scripts/sample_script.php", "$user_folder/sample_script.php");
+
+        echo "<p>User $username registered successfully. Please log in.</p>";
+    }
+}
+
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Fetch user from database
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['username'] = $username;
+        header("Location: /user_home");
+        exit();
+    } else {
+        echo "<p>Invalid credentials. Please try again.</p>";
+    }
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: /login");
+    exit();
+}
+
+// Display user home
+if (isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
+    $user_folder = "master/$username";
+
+    // List PHP scripts in the user's folder
+    if (is_dir($user_folder)) {
+        $scripts = array_filter(scandir($user_folder), function ($file) {
+            return pathinfo($file, PATHINFO_EXTENSION) === 'php';
+        });
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['run_script'])) {
+        $script_name = $_POST['script_name'];
+        $script_path = "$user_folder/$script_name";
+
+        if (file_exists($script_path)) {
+            ob_start();
+            include($script_path);
+            $output = ob_get_clean();
+            echo "<pre>$output</pre>";
+        } else {
+            echo "<p>Script not found or access denied.</p>";
+        }
+    }
+
+    echo "<h1>Welcome, $username!</h1>";
+    echo "<h2>Your scripts:</h2>";
+    foreach ($scripts as $script) {
+        echo "<form method='POST'>
+                <input type='hidden' name='script_name' value='$script'>
+                <button type='submit' name='run_script'>Run $script</button>
+              </form><br>";
+    }
+    echo "<a href='?logout'>Logout</a>";
+    exit();
+}
+
+// Display registration form
+if (!isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/register') {
+    include('templates/register.php');
+}
+
+// Display login form
+if (!isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/login') {
+    include('templates/login.php');
+}
+?>
+
+-----------------------------------------------------------------------------------------
+
+5. scripts/sample_script.php
+
+<?php
+echo "Hello from your PHP script!";
+?>
+
+----------------------------------------------------------------------------------------
+
+6. templates/login.php
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form action="/login" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit" name="login">Login</button>
+    </form>
+    <br>
+    <p>New user? <a href="/register">Register Here</a></p>
+</body>
+</html>
+
+---------------------------------------------------------------------------------------
+
+7. templates/register.php
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <form action="/register" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit" name="register">Register</button>
+    </form>
+    <br>
+    <p>Already have an account? <a href="/login">Login Here</a></p>
+</body>
+</html>
+
+------------------------------------------------------------------------------
+
+8. templates/user_home.php
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home</title>
+</head>
+<body>
+    <h2>Welcome, <?php echo htmlspecialchars($username); ?></h2>
+    
+    <h3>Your scripts:</h3>
+    <ul>
+        <?php foreach ($scripts as $script): ?>
+            <li>
+                <form method="POST">
+                    <input type="hidden" name="script_name" value="<?php echo htmlspecialchars($script); ?>">
+                    <button type="submit" name="run_script">Run <?php echo htmlspecialchars($script); ?></button>
+                </form>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+
+    <a href="?logout">Logout</a>
+</body>
+</html>
+
+--------------------------------------------------------------------------------------
+
+Steps to Run the Application
+Create your project directory and copy the above files into the respective locations.
+Navigate to your project directory in the terminal.
+
+Access the application in your browser at http://localhost:5000.
+Important Notes
+This setup uses the PHP built-in server for simplicity, which is suitable for development. For production, consider using a full-fledged web server like Apache or Nginx.
+Ensure the scripts/sample_script.php file exists and is executable.
+Adjust permissions for the master folder as necessary.
+This structure should meet your requirements for user registration, session management, and script execution within user-specific folders.
+Let me know if you need any modifications or additional features!
+
+======================================================================================================================================================
+======================================================================================================================================================
+
+
+
