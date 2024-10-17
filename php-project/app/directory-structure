@@ -1,0 +1,15 @@
+your_project/
+│
+├── docker-compose.yml
+├── Dockerfile
+├── app.php
+│
+├── scripts/
+│   └── sample_script.php
+│
+├── templates/
+│   ├── login.php
+│   ├── register.php
+│   └── user_home.php
+│
+└── dockerfile
