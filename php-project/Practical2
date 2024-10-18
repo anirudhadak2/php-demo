@@ -1,0 +1,1018 @@
+
+Practical 2 
+
++ strip --strip-all modules/pdo.so
+Installing shared extensions:     /usr/local/lib/php/extensions/no-debug-non-zts-20190902/
+Installing header files:          /usr/local/include/php/
+Installing PDO headers:           /usr/local/include/php/ext/pdo/
+find . -name \*.gcno -o -name \*.gcda | xargs rm -f
+warning: pdo (pdo.so) is already loaded!
+find . -name \*.lo -o -name \*.o | xargs rm -f
+find . -name \*.la -o -name \*.a | xargs rm -f
+find . -name \*.so | xargs rm -f
+find . -name .libs -a -type d|xargs rm -rf
+rm -f libphp.la      modules/* libs/*
+Configuring for:
+PHP Api Version:         20190902
+Zend Module Api No:      20190902
+Zend Extension Api No:   320190902
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking for a sed that does not truncate output... /bin/sed
+checking for pkg-config... /usr/bin/pkg-config
+checking pkg-config is at least version 0.9.0... yes
+checking for cc... cc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether cc accepts -g... yes
+checking for cc option to accept ISO C89... none needed
+checking how to run the C preprocessor... cc -E
+checking for icc... no
+checking for suncc... no
+checking for system library directory... lib
+checking if compiler supports -R... no
+checking if compiler supports -Wl,-rpath,... yes
+checking build system type... x86_64-pc-linux-gnu
+checking host system type... x86_64-pc-linux-gnu
+checking target system type... x86_64-pc-linux-gnu
+checking for PHP prefix... /usr/local
+checking for PHP includes... -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib
+checking for PHP extension directory... /usr/local/lib/php/extensions/no-debug-non-zts-20190902
+checking for PHP installed headers prefix... /usr/local/include/php
+checking if debug is enabled... no
+checking if zts is enabled... no
+checking for gawk... no
+checking for nawk... nawk
+checking if nawk is broken... no
+checking for MySQL support for PDO... yes, shared
+checking for the location of libz... no
+checking for MySQL UNIX socket location... 
+checking for PDO includes... /usr/local/include/php/ext
+checking for a sed that does not truncate output... /bin/sed
+checking for ld used by cc... /usr/bin/ld
+checking if the linker (/usr/bin/ld) is GNU ld... yes
+checking for /usr/bin/ld option to reload object files... -r
+checking for BSD-compatible nm... /usr/bin/nm -B
+checking whether ln -s works... yes
+checking how to recognize dependent libraries... pass_all
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking dlfcn.h usability... yes
+checking dlfcn.h presence... yes
+checking for dlfcn.h... yes
+checking the maximum length of command line arguments... 1572864
+checking command to parse /usr/bin/nm -B output from cc object... ok
+checking for objdir... .libs
+checking for ar... ar
+checking for ranlib... ranlib
+checking for strip... strip
+checking if cc supports -fno-rtti -fno-exceptions... no
+checking for cc option to produce PIC... -fPIC
+checking if cc PIC flag -fPIC works... yes
+checking if cc static flag -static works... yes
+checking if cc supports -c -o file.o... yes
+checking whether the cc linker (/usr/bin/ld -m elf_x86_64) supports shared libraries... yes
+checking whether -lc should be explicitly linked in... no
+checking dynamic linker characteristics... GNU/Linux ld.so
+checking how to hardcode library paths into programs... immediate
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... yes
+checking whether to build static libraries... no
+
+creating libtool
+appending configuration tag "CXX" to libtool
+configure: patching config.h.in
+configure: creating ./config.status
+config.status: creating config.h
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=compile cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo_mysql/pdo_mysql.c -o pdo_mysql.lo 
+mkdir .libs
+ cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo_mysql/pdo_mysql.c  -fPIC -DPIC -o .libs/pdo_mysql.o
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=compile cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo_mysql/mysql_driver.c -o mysql_driver.lo 
+ cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo_mysql/mysql_driver.c  -fPIC -DPIC -o .libs/mysql_driver.o
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=compile cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo_mysql/mysql_statement.c -o mysql_statement.lo 
+ cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo_mysql/mysql_statement.c  -fPIC -DPIC -o .libs/mysql_statement.o
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=link cc -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64  -Wl,-O1 -pie  -o pdo_mysql.la -export-dynamic -avoid-version -prefer-pic -module -rpath /usr/src/php/ext/pdo_mysql/modules  pdo_mysql.lo mysql_driver.lo mysql_statement.lo 
+cc -shared  .libs/pdo_mysql.o .libs/mysql_driver.o .libs/mysql_statement.o   -Wl,-O1 -Wl,-soname -Wl,pdo_mysql.so -o .libs/pdo_mysql.so
+creating pdo_mysql.la
+(cd .libs && rm -f pdo_mysql.la && ln -s ../pdo_mysql.la pdo_mysql.la)
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=install cp ./pdo_mysql.la /usr/src/php/ext/pdo_mysql/modules
+cp ./.libs/pdo_mysql.so /usr/src/php/ext/pdo_mysql/modules/pdo_mysql.so
+cp ./.libs/pdo_mysql.lai /usr/src/php/ext/pdo_mysql/modules/pdo_mysql.la
+PATH="$PATH:/sbin" ldconfig -n /usr/src/php/ext/pdo_mysql/modules
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /usr/src/php/ext/pdo_mysql/modules
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the `LD_RUN_PATH' environment variable
+     during linking
+   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+
+Build complete.
+Don't forget to run 'make test'.
+
++ strip --strip-all modules/pdo_mysql.so
+Installing shared extensions:     /usr/local/lib/php/extensions/no-debug-non-zts-20190902/
+find . -name \*.gcno -o -name \*.gcda | xargs rm -f
+find . -name \*.lo -o -name \*.o | xargs rm -f
+find . -name \*.la -o -name \*.a | xargs rm -f
+find . -name \*.so | xargs rm -f
+find . -name .libs -a -type d|xargs rm -rf
+rm -f libphp.la      modules/* libs/*
+Removing intermediate container fbe3dbf62a1d
+ ---> 208f4c24924d
+Step 3/6 : WORKDIR /app
+ ---> Running in eb459f8bde97
+Removing intermediate container eb459f8bde97
+ ---> fbdc2a747cf8
+Step 4/6 : COPY . /app
+ ---> 2bdc1ca3f781
+Step 5/6 : EXPOSE 5000
+ ---> Running in 27640d9abc04
+Removing intermediate container 27640d9abc04
+ ---> e40c6770cf80
+Step 6/6 : CMD ["php", "-S", "0.0.0.0:5000", "app.php"]
+ ---> Running in 94eae818b26b
+Removing intermediate container 94eae818b26b
+ ---> 3ceea3b8d3a3
+Successfully built 3ceea3b8d3a3
+Successfully tagged php-app:latest
+
+controlplane $ docker images
+REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
+php-app      latest    3ceea3b8d3a3   14 seconds ago   533MB
+mysql        5.7       5107333e08a8   10 months ago    501MB
+php          7.4-cli   7bbbb12d1498   23 months ago    474MB
+
+controlplane $ docker ps
+CONTAINER ID   IMAGE       COMMAND                  CREATED         STATUS         PORTS                 NAMES
+0d7bfbbdd9bf   mysql:5.7   "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes   3306/tcp, 33060/tcp   mysql-db
+controlplane $ docker run -d -p 5000:5000 php-app:latest
+cb663ec27a9eb7682c7db4e57b5789ed70d37e7133a761783419beaf5840fd13
+
+controlplane $ docker ps
+CONTAINER ID   IMAGE            COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+cb663ec27a9e   php-app:latest   "docker-php-entrypoi…"   3 seconds ago   Up 1 second    0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   dreamy_carver
+0d7bfbbdd9bf   mysql:5.7        "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes   3306/tcp, 33060/tcp                         mysql-db
+controlplane $ docker ps
+CONTAINER ID   IMAGE            COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+cb663ec27a9e   php-app:latest   "docker-php-entrypoi…"   5 seconds ago   Up 3 seconds   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   dreamy_carver
+0d7bfbbdd9bf   mysql:5.7        "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes   3306/tcp, 33060/tcp                         mysql-db
+
+controlplane $ docker images
+REPOSITORY   TAG       IMAGE ID       CREATED              SIZE
+php-app      latest    3ceea3b8d3a3   About a minute ago   533MB
+mysql        5.7       5107333e08a8   10 months ago        501MB
+php          7.4-cli   7bbbb12d1498   23 months ago        474MB
+
+controlplane $ docker login 
+Log in with your Docker ID or email address to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com/ to create one.
+You can log in with your password or a Personal Access Token (PAT). Using a limited-scope PAT grants better security and is required for organizations using SSO. Learn more at https://docs.docker.com/go/access-tokens/
+
+Username: anirudhadak2
+Password: 
+WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+
+controlplane $  docker tag php-app:latest anirudhadak2/test:php-app1
+controlplane $ docker push anirudhadak2/test:php-app1
+The push refers to repository [docker.io/anirudhadak2/test]
+729398ad9732: Pushed 
+e7ca09d0de6c: Pushed 
+a3b9950f6bec: Pushed 
+d143ce802d49: Layer already exists 
+502fe165ca51: Layer already exists 
+c6f5e936b72e: Layer already exists 
+91fd2792fa74: Layer already exists 
+08cc615b0242: Layer already exists 
+44148371c697: Layer already exists 
+797a7c0590e0: Layer already exists 
+f60117696410: Layer already exists 
+ec4a38999118: Layer already exists 
+php-app1: digest: sha256:513768f2561863ad11f44fc6727651de223ee6c76ceb75ebb1fe03eca3337876 size: 2829
+controlplane $ docker ps
+CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+cb663ec27a9e   php-app:latest   "docker-php-entrypoi…"   2 minutes ago    Up 2 minutes    0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   dreamy_carver
+0d7bfbbdd9bf   mysql:5.7        "docker-entrypoint.s…"   11 minutes ago   Up 11 minutes   3306/tcp, 33060/tcp                         mysql-db
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates
+---------------------------------------------------------------
+
+controlplane $ cat app.php
+<?php
+session_start();
+
+// Database configuration from environment variables
+$host = getenv('DB_HOST') ?: 'mysql-db';
+$dbname = getenv('DB_NAME') ?: 'users_db';
+$username_db = getenv('DB_USER') ?: 'root';
+$password_db = getenv('DB_PASSWORD') ?: 'rootpassword';
+
+// Connect to MySQL database
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username_db, $password_db);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Create the users table if it doesn't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    )");
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
+// Ensure master folder exists
+if (!is_dir('master')) {
+    mkdir('master', 0777, true);
+}
+
+// Handle registration
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+    // Check if username already exists
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        echo "<p>Username already taken. Try another.</p>";
+    } else {
+        // Insert new user into the database
+        $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        $stmt->execute([$username, $password]);
+
+        // Create user folder inside /master
+        $user_folder = "master/$username";
+        mkdir($user_folder);
+
+        // Copy sample script into user's folder
+        copy("scripts/sample_script.php", "$user_folder/sample_script.php");
+
+        echo "<p>User $username registered successfully. Please log in.</p>";
+    }
+}
+
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Fetch user from database
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['username'] = $username;
+        header("Location: /user_home");
+        exit();
+    } else {
+        echo "<p>Invalid credentials. Please try again.</p>";
+    }
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: /login");
+    exit();
+}
+
+// Display user home
+if (isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
+    $user_folder = "master/$username";
+
+    // Initialize scripts array to prevent undefined variable issues
+    $scripts = [];
+
+    // List PHP scripts in the user's folder
+    if (is_dir($user_folder)) {
+        $scripts = array_filter(scandir($user_folder), function ($file) {
+            return pathinfo($file, PATHINFO_EXTENSION) === 'php';
+        });
+    }
+
+    // Check if any scripts exist in the user's folder
+    if (!empty($scripts)) {
+        echo "<h1>Welcome, $username!</h1>";
+        echo "<h2>Your scripts:</h2>";
+        foreach ($scripts as $script) {
+            echo "<form method='POST'>
+                    <input type='hidden' name='script_name' value='$script'>
+                    <button type='submit' name='run_script'>Run $script</button>
+                  </form><br>";
+        }
+    } else {
+        echo "<p>No scripts found in your folder.</p>";
+    }
+
+    // Handle script execution
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['run_script'])) {
+        $script_name = $_POST['script_name'];
+        $script_path = "$user_folder/$script_name";
+
+        if (file_exists($script_path)) {
+            ob_start();
+            include($script_path);
+            $output = ob_get_clean();
+            echo "<pre>$output</pre>";
+        } else {
+            echo "<p>Script not found or access denied.</p>";
+        }
+    }
+
+    echo "<a href='?logout'>Logout</a>";
+    exit();
+}
+
+// Display registration form
+if (!isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/register') {
+    include('templates/register.php');
+}
+
+// Display login form
+if (!isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/login') {
+    include('templates/login.php');
+}
+
+------------------------------------------------------------------
+controlplane $ cd scripts
+controlplane $ ls
+command-exec.php  sample_script.php
+controlplane $ cat command-exec.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Executor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            font-family: monospace;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        input[type="text"] {
+            width: 60%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Command Executor</h1>
+    <p>Enter a system command below and click "Execute" to run it.</p>
+
+    <!-- Form to input system command -->
+    <form method="POST">
+        <label for="cmd">Enter Command:</label><br>
+        <input type="text" name="cmd" id="cmd" required><br>
+        <input type="submit" value="Execute">
+    </form>
+
+    <?php
+    // Handle command execution
+    if (isset($_POST['cmd'])) {
+        echo "<h2>Command Output:</h2>";
+        echo "<textarea readonly>";
+        // Sanitize and execute the command
+        $cmd = escapeshellcmd($_POST['cmd']);
+        system($cmd);
+        echo "</textarea>";
+    }
+    ?>
+</body>
+</html>
+
+-------------------------------------------
+
+controlplane $ ls
+command-exec.php  sample_script.php
+controlplane $ pwd
+/root/php-demo/php-project/app/scripts
+controlplane $ cd ..
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates
+controlplane $ cd ..
+controlplane $ ls
+Practical  Problem-Statement  app  k8s-php-yaml
+controlplane $ cd k8s-php-yaml
+controlplane $ ls
+mysql.yaml  php-deployment.yaml
+controlplane $ vi php-deployment.yaml
+controlplane $ kubectl get pod 
+kNo resources found in default namespace.
+controlplane $ docker ps
+CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+cb663ec27a9e   php-app:latest   "docker-php-entrypoi…"   3 minutes ago    Up 3 minutes    0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   dreamy_carver
+0d7bfbbdd9bf   mysql:5.7        "docker-entrypoint.s…"   13 minutes ago   Up 13 minutes   3306/tcp, 33060/tcp                         mysql-db
+controlplane $ docker stop cb663ec27a9e
+docker stop cb663ec27a9e
+controlplane $ docker stop 0d7bfbbdd9bf
+0d7bfbbdd9bf
+controlplane $ docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+controlplane $ ls   
+mysql.yaml  php-deployment.yaml
+controlplane $ kubectl create -f mysql.yaml 
+deployment.apps/mysql-db created
+service/mysql-db created
+controlplane $ kubectl get pod
+NAME                       READY   STATUS    RESTARTS   AGE
+mysql-db-8f54f75f4-b5kx4   1/1     Running   0          4s
+controlplane $ kubectl get svc
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP    10d
+mysql-db     ClusterIP   10.96.53.228   <none>        3306/TCP   7s
+controlplane $ kubectl create -f php-deployment.yaml
+deployment.apps/php-app created
+service/php-app created
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-b5kx4   1/1     Running             0          24s
+php-app-ccd4b6d66-bwflx    0/1     ContainerCreating   0          3s
+controlplane $ kubectl get svc
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP          10d
+mysql-db     ClusterIP   10.96.53.228     <none>        3306/TCP         28s
+php-app      NodePort    10.101.212.123   <none>        5000:30000/TCP   7s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS    RESTARTS   AGE
+mysql-db-8f54f75f4-b5kx4   1/1     Running   0          30s
+php-app-ccd4b6d66-bwflx    1/1     Running   0          9s
+controlplane $ ls
+mysql.yaml  php-deployment.yaml
+controlplane $ kubectl get pod
+NAME                       READY   STATUS    RESTARTS   AGE
+mysql-db-8f54f75f4-b5kx4   1/1     Running   0          2m18s
+php-app-ccd4b6d66-bwflx    1/1     Running   0          117s
+controlplane $ kubectl exec -it php-app-ccd4b6d66-bwflx -- bash
+root@php-app-ccd4b6d66-bwflx:/app# ls
+Dockerfile  app.php  directory-structure  master  scripts  templates
+root@php-app-ccd4b6d66-bwflx:/app# cd master
+root@php-app-ccd4b6d66-bwflx:/app/master# ls
+anirudha
+root@php-app-ccd4b6d66-bwflx:/app/master# cd anirudha
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# l
+bash: l: command not found
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# ls
+sample_script.php
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# vi command-exec.php
+bash: vi: command not found
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# pwd 
+/app/master/anirudha
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# exit
+exit
+controlplane $ ls
+mysql.yaml  php-deployment.yaml
+controlplane $ vi command-exe.php 
+controlplane $ ls
+command-exe.php  mysql.yaml  php-deployment.yaml
+controlplane $ kubectl get pod 
+NAME                       READY   STATUS    RESTARTS   AGE
+mysql-db-8f54f75f4-b5kx4   1/1     Running   0          3m59s
+php-app-ccd4b6d66-bwflx    1/1     Running   0          3m38s
+controlplane $ kubectl cp command-exe.php php-app-ccd4b6d66-bwflx:/app/master/anirudha
+controlplane $ kubectl exec -it php-app-ccd4b6d66-bwflx -- bash
+root@php-app-ccd4b6d66-bwflx:/app# ls
+Dockerfile  app.php  directory-structure  master  scripts  templates
+root@php-app-ccd4b6d66-bwflx:/app# cd master
+root@php-app-ccd4b6d66-bwflx:/app/master# ls
+anirudha
+root@php-app-ccd4b6d66-bwflx:/app/master# cd anirudha
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# ls
+command-exe.php  sample_script.php
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# ls
+command-exe.php  sample_script.php
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# ls
+command-exe.php  sample_script.php
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# ls 
+command-exe.php  sample_script.php
+root@php-app-ccd4b6d66-bwflx:/app/master/anirudha# cd ..
+root@php-app-ccd4b6d66-bwflx:/app/master# ls
+anirudha
+root@php-app-ccd4b6d66-bwflx:/app/master# cd ..
+root@php-app-ccd4b6d66-bwflx:/app# ls
+Dockerfile  app.php  directory-structure  master  scripts  templates
+root@php-app-ccd4b6d66-bwflx:/app# ls
+Dockerfile  app.php  directory-structure  master  scripts  templates
+root@php-app-ccd4b6d66-bwflx:/app# cd 
+root@php-app-ccd4b6d66-bwflx:~# exit
+exit
+controlplane $ ls
+command-exe.php  mysql.yaml  php-deployment.yaml
+
+controlplane $ cat command-exe.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Executor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            font-family: monospace;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        input[type="text"] {
+            width: 60%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Command Executor</h1>
+    <p>Enter a system command below and click "Execute" to run it.</p>
+
+    <!-- Form to input system command -->
+    <form method="POST">
+        <label for="cmd">Enter Command:</label><br>
+        <input type="text" name="cmd" id="cmd" required><br>
+        <input type="submit" value="Execute">
+    </form>
+
+    <?php
+    // Handle command execution
+    if (isset($_POST['cmd'])) {
+        echo "<h2>Command Output:</h2>";
+        echo "<textarea readonly>";
+        // Sanitize and execute the command
+        $cmd = escapeshellcmd($_POST['cmd']);
+        system($cmd);
+        echo "</textarea>";
+    }
+    ?>
+</body>
+</html>
+
+-------------------------------------------------------
+
+controlplane $ ls
+command-exe.php  mysql.yaml  php-deployment.yaml
+controlplane $ cat php-deployment.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php
+  template:
+    metadata:
+      labels:
+        app: php
+    spec:
+      containers:
+        - name: php-app
+          image:  anirudhadak2/test:php-app1      # php-app:latest  # Update with your actual image
+          env:
+            - name: DB_HOST
+              value: "mysql-db"  # Use the MySQL service name
+            - name: DB_NAME
+              value: "users_db"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              value: "rootpassword"
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-app
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30000  # Choose a node port (between 30000-32767)
+  selector:
+    app: php
+
+---------------------------------------------------------------------
+
+controlplane $ cat mysql.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "rootpassword"
+            - name: MYSQL_DATABASE
+              value: "users_db"
+          ports:
+            - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-db
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: mysql
+
+controlplane $ ls
+command-exe.php  mysql.yaml  php-deployment.yaml
+controlplane $ pwd
+/root/php-demo/php-project/k8s-php-yaml
+controlplane $ cd ..
+controlplane $ ls
+Practical  Problem-Statement  app  k8s-php-yaml
+controlplane $ cd app
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates
+controlplane $ cat app.php
+<?php
+session_start();
+
+// Database configuration from environment variables
+$host = getenv('DB_HOST') ?: 'mysql-db';
+$dbname = getenv('DB_NAME') ?: 'users_db';
+$username_db = getenv('DB_USER') ?: 'root';
+$password_db = getenv('DB_PASSWORD') ?: 'rootpassword';
+
+// Connect to MySQL database
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username_db, $password_db);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Create the users table if it doesn't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    )");
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
+// Ensure master folder exists
+if (!is_dir('master')) {
+    mkdir('master', 0777, true);
+}
+
+// Handle registration
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+    // Check if username already exists
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        echo "<p>Username already taken. Try another.</p>";
+    } else {
+        // Insert new user into the database
+        $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        $stmt->execute([$username, $password]);
+
+        // Create user folder inside /master
+        $user_folder = "master/$username";
+        mkdir($user_folder);
+
+        // Copy sample script into user's folder
+        copy("scripts/sample_script.php", "$user_folder/sample_script.php");
+
+        echo "<p>User $username registered successfully. Please log in.</p>";
+    }
+}
+
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Fetch user from database
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['username'] = $username;
+        header("Location: /user_home");
+        exit();
+    } else {
+        echo "<p>Invalid credentials. Please try again.</p>";
+    }
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: /login");
+    exit();
+}
+
+// Display user home
+if (isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
+    $user_folder = "master/$username";
+
+    // Initialize scripts array to prevent undefined variable issues
+    $scripts = [];
+
+    // List PHP scripts in the user's folder
+    if (is_dir($user_folder)) {
+        $scripts = array_filter(scandir($user_folder), function ($file) {
+            return pathinfo($file, PATHINFO_EXTENSION) === 'php';
+        });
+    }
+
+    // Check if any scripts exist in the user's folder
+    if (!empty($scripts)) {
+        echo "<h1>Welcome, $username!</h1>";
+        echo "<h2>Your scripts:</h2>";
+        foreach ($scripts as $script) {
+            echo "<form method='POST'>
+                    <input type='hidden' name='script_name' value='$script'>
+                    <button type='submit' name='run_script'>Run $script</button>
+                  </form><br>";
+        }
+    } else {
+        echo "<p>No scripts found in your folder.</p>";
+    }
+
+    // Handle script execution
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['run_script'])) {
+        $script_name = $_POST['script_name'];
+        $script_path = "$user_folder/$script_name";
+
+        if (file_exists($script_path)) {
+            ob_start();
+            include($script_path);
+            $output = ob_get_clean();
+            echo "<pre>$output</pre>";
+        } else {
+            echo "<p>Script not found or access denied.</p>";
+        }
+    }
+
+    echo "<a href='?logout'>Logout</a>";
+    exit();
+}
+
+// Display registration form
+if (!isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/register') {
+    include('templates/register.php');
+}
+
+// Display login form
+if (!isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/login') {
+    include('templates/login.php');
+}
+
+-------------------------------------------
+
+controlplane $ history 
+    1  apt-get update
+    2  halt
+    3  FILE=/ks/wait-background.sh; while ! test -f ${FILE}; do clear; sleep 0.1; done; bash ${FILE}
+    4  kubectl get pod 
+    5  kubectl get nodes
+    6  git clone https://github.com/anirudhadak2/php-demo.git
+    7  ls
+    8  cd php-demo
+    9  ls
+   10  cd Session Reset for php
+   11  cd 'Session Reset for php' 
+   12  vi 'Session Reset for php' 
+   13  cd php-project
+   14  ls
+   15  cd ..
+   16  cd python-project
+   17  ls
+   18  cd ..
+   19  ls
+   20  cd php-project
+   21  ls
+   22  vi practica
+   23  vi practical
+   24  ls
+   25  vi Practical
+   26  ls
+   27  cd k8s-php-yaml
+   28  l
+   29  vi mysql.yaml
+   30  kubectl create -f mysql.yaml
+   31  kubectl get pod
+   32  kubectl get pod 
+   33  kubectl get pod  -w
+   34  kubectl create -f php-deployment.yaml 
+   35  kubectl get pod
+   36  kubectl get pod -w
+   37  kubectl get pod 
+   38  kubectl get svc
+   39  kubectl get pod
+   40  kubectl get svc
+   41  kubectl get deployment 
+   42  kubectl delete deployment mysql-db
+   43  kubectl delete deployment php-app
+   44  kubectl get pod 
+   45  kubectl get svc
+   46  kubectl delete svc mysql-db
+   47  kubectl delete svc php-app
+   48  kubectl get pod
+   49  kubectl get svc
+   50  ls
+   51  cd //
+   52  cd ..
+   53  ls
+   54  cd 
+   55  ls
+   56  cd php=demo 
+   57  cd php-demo
+   58  l
+   59  cd php-project
+   60  ls
+   61  cd app
+   62  ls
+   63  docker run  --name=mysql-db  -e MYSQL_ROOT_PASSWORD=rootpassword  -e MYSQL_DATABASE=users_db  -d mysql:5.7 
+   64  docker ps
+   65  docker build -t php-app .
+   66  ls
+   67  docker images
+   68  ls
+   69  vi app.php
+   70  mv app.php /mnt 
+   71  ls
+   72  vi app.php
+   73  ls
+   74  docker build -t php-app .
+   75  ls
+   76  cd scripts
+   77  ls
+   78  vi command-exec.php
+   79  ls
+   80  cd
+   81  ls
+   82  cd php-demo
+   83  ls
+   84  cd php-project
+   85  ls
+   86  cd app
+   87  ls
+   88  docker build -t php-app .
+   89  docker images
+   90  docker ps
+   91  docker run -d -p 5000:5000 php-app:latest
+   92  docker ps
+   93  docker images
+   94  docker login 
+   95  docker push anirudhadak2/test:php-app1
+   96  docker ps
+   97  ls
+   98  cat app.php
+   99  cd scripts
+  100  ls
+  101  cat command-exec.php
+  102  ls
+  103  pwd
+  104  cd ..
+  105  ls
+  106  cd ..
+  107  ls
+  108  cd k8s-php-yaml
+  109  ls
+  110  vi php-deployment.yaml
+  111  kubectl get pod 
+  112  docker ps
+  113  docker stop cb663ec27a9e
+  114  docker stop 0d7bfbbdd9bf
+  115  docker ps
+  116  ls
+  117  kubectl create -f mysql.yaml 
+  118  kubectl get pod
+  119  kubectl get svc
+  120  kubectl create -f php-deployment.yaml
+  121  kubectl get pod
+  122  kubectl get svc
+  123  kubectl get pod
+  124  ls
+  125  kubectl get pod
+  126  kubectl exec -it php-app-ccd4b6d66-bwflx -- bash
+  127  ls
+  128  vi command-exe.php 
+  129  ls
+  130  kubectl get pod 
+  131  kubectl cp command-exe.php php-app-ccd4b6d66-bwflx:/app/master/anirudha
+  132  kubectl exec -it php-app-ccd4b6d66-bwflx -- bash
+  133  ls
+  134  cat command-exe.php
+  135  ls
+  136  cat php-deployment.yaml 
+  137  cat mysql.yaml 
+  138  ls
+  139  pwd
+  140  cd ..
+  141  ls
+  142  cd app
+  143  ls
+  144  cat app.php
+  145  history 
+controlplane $ 
+
+
