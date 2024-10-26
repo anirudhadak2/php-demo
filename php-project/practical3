@@ -1,0 +1,1162 @@
+12:38
+26-10-2024
+
+as expected all done 
+
+
+
+
+controlplane $ git clone https://github.com/anirudhadak2/php-demo.git
+Cloning into 'php-demo'...
+remote: Enumerating objects: 150, done.
+remote: Counting objects: 100% (150/150), done.
+remote: Compressing objects: 100% (125/125), done.
+remote: Total 150 (delta 66), reused 0 (delta 0), pack-reused 0 (from 0)
+Receiving objects: 100% (150/150), 107.68 KiB | 6.73 MiB/s, done.
+Resolving deltas: 100% (66/66), done.
+controlplane $ ls
+filesystem  php-demo  snap
+controlplane $ cd php-demo
+controlplane $ ls
+ README.md               'ingress with yaml files'     'new php dockerfile'   php-dockerfile-demo   python-project
+'Session Reset for php'  'k8s installation on Ubuntu'  'php yaml files'       php-project
+controlplane $ cd php-project
+controlplane $ ls
+Practical  Practical2  Problem-Statement  Problem-Statement2  app  k8s-php-yaml
+controlplane $ cd app
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates  updated-app.php
+controlplane $ vi app.php
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates  updated-app.php
+controlplane $ cd templates
+controlplane $ ls
+login.php  register.php  user_home.php
+controlplane $ vi user_home.php 
+controlplane $ cd ..
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates  updated-app.php
+controlplane $ docker build -t php-demo9.4  . 
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  27.14kB
+Step 1/6 : FROM php:7.4-cli
+7.4-cli: Pulling from library/php
+a603fa5e3b41: Pull complete 
+c428f1a49423: Pull complete 
+156740b07ef8: Pull complete 
+fb5a4c8af82f: Pull complete 
+972155ae644b: Pull complete 
+a8e3b94fe6c1: Pull complete 
+c77004105467: Pull complete 
+d3e4898bfd25: Pull complete 
+30f377be4678: Pull complete 
+Digest: sha256:620a6b9f4d4feef2210026172570465e9d0c1de79766418d3affd09190a7fda5
+Status: Downloaded newer image for php:7.4-cli
+ ---> 7bbbb12d1498
+Step 2/6 : RUN apt-get update && apt-get install -y     default-mysql-client     && docker-php-ext-install pdo pdo_mysql
+ ---> Running in 3f9a54798bd4
+Get:1 http://deb.debian.org/debian bullseye InRelease [116 kB]
+Get:2 http://deb.debian.org/debian-security bullseye-security InRelease [27.2 kB]
+Get:3 http://deb.debian.org/debian bullseye-updates InRelease [44.1 kB]
+Get:4 http://deb.debian.org/debian bullseye/main amd64 Packages [8066 kB]
+Get:5 http://deb.debian.org/debian-security bullseye-security/main amd64 Packages [307 kB]
+Get:6 http://deb.debian.org/debian bullseye-updates/main amd64 Packages [18.8 kB]
+Fetched 8579 kB in 2s (4530 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  libbsd0 libconfig-inifiles-perl libdbd-mariadb-perl libdbi-perl libedit2
+  libgpm2 libmariadb3 libmd0 libncurses6 libterm-readkey-perl libtinfo6
+  mariadb-client-10.5 mariadb-client-core-10.5 mariadb-common mysql-common
+Suggested packages:
+  libclone-perl libmldbm-perl libnet-daemon-perl libsql-statement-perl gpm
+The following NEW packages will be installed:
+  default-mysql-client libbsd0 libconfig-inifiles-perl libdbd-mariadb-perl
+  libdbi-perl libedit2 libgpm2 libmariadb3 libmd0 libncurses6
+  libterm-readkey-perl mariadb-client-10.5 mariadb-client-core-10.5
+  mariadb-common mysql-common
+The following packages will be upgraded:
+  libtinfo6
+1 upgraded, 15 newly installed, 0 to remove and 53 not upgraded.
+Need to get 4204 kB of archives.
+After this operation, 40.4 MB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian bullseye/main amd64 libtinfo6 amd64 6.2+20201114-2+deb11u2 [342 kB]
+Get:2 http://deb.debian.org/debian bullseye/main amd64 libconfig-inifiles-perl all 3.000003-1 [52.1 kB]
+Get:3 http://deb.debian.org/debian bullseye/main amd64 mysql-common all 5.8+1.0.7 [7464 B]
+Get:4 http://deb.debian.org/debian-security bullseye-security/main amd64 mariadb-common all 1:10.5.26-0+deb11u2 [37.5 kB]
+Get:5 http://deb.debian.org/debian-security bullseye-security/main amd64 libmariadb3 amd64 1:10.5.26-0+deb11u2 [177 kB]
+Get:6 http://deb.debian.org/debian bullseye/main amd64 libmd0 amd64 1.0.3-3 [28.0 kB]
+Get:7 http://deb.debian.org/debian bullseye/main amd64 libbsd0 amd64 0.11.3-1+deb11u1 [108 kB]
+Get:8 http://deb.debian.org/debian bullseye/main amd64 libedit2 amd64 3.1-20191231-2+b1 [96.7 kB]
+Get:9 http://deb.debian.org/debian bullseye/main amd64 libncurses6 amd64 6.2+20201114-2+deb11u2 [102 kB]
+Get:10 http://deb.debian.org/debian-security bullseye-security/main amd64 mariadb-client-core-10.5 amd64 1:10.5.26-0+deb11u2 [786 kB]
+Get:11 http://deb.debian.org/debian-security bullseye-security/main amd64 mariadb-client-10.5 amd64 1:10.5.26-0+deb11u2 [1511 kB]
+Get:12 http://deb.debian.org/debian bullseye/main amd64 default-mysql-client all 1.0.7 [3700 B]
+Get:13 http://deb.debian.org/debian bullseye/main amd64 libdbi-perl amd64 1.643-3+b1 [780 kB]
+Get:14 http://deb.debian.org/debian bullseye/main amd64 libdbd-mariadb-perl amd64 1.21-3 [110 kB]
+Get:15 http://deb.debian.org/debian bullseye/main amd64 libgpm2 amd64 1.20.7-8 [35.6 kB]
+Get:16 http://deb.debian.org/debian bullseye/main amd64 libterm-readkey-perl amd64 2.38-1+b2 [27.8 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 4204 kB in 0s (37.6 MB/s)
+(Reading database ... 13203 files and directories currently installed.)
+Preparing to unpack .../libtinfo6_6.2+20201114-2+deb11u2_amd64.deb ...
+Unpacking libtinfo6:amd64 (6.2+20201114-2+deb11u2) over (6.2+20201114-2) ...
+Setting up libtinfo6:amd64 (6.2+20201114-2+deb11u2) ...
+Selecting previously unselected package libconfig-inifiles-perl.
+(Reading database ... 13203 files and directories currently installed.)
+Preparing to unpack .../00-libconfig-inifiles-perl_3.000003-1_all.deb ...
+Unpacking libconfig-inifiles-perl (3.000003-1) ...
+Selecting previously unselected package mysql-common.
+Preparing to unpack .../01-mysql-common_5.8+1.0.7_all.deb ...
+Unpacking mysql-common (5.8+1.0.7) ...
+Selecting previously unselected package mariadb-common.
+Preparing to unpack .../02-mariadb-common_1%3a10.5.26-0+deb11u2_all.deb ...
+Unpacking mariadb-common (1:10.5.26-0+deb11u2) ...
+Selecting previously unselected package libmariadb3:amd64.
+Preparing to unpack .../03-libmariadb3_1%3a10.5.26-0+deb11u2_amd64.deb ...
+Unpacking libmariadb3:amd64 (1:10.5.26-0+deb11u2) ...
+Selecting previously unselected package libmd0:amd64.
+Preparing to unpack .../04-libmd0_1.0.3-3_amd64.deb ...
+Unpacking libmd0:amd64 (1.0.3-3) ...
+Selecting previously unselected package libbsd0:amd64.
+Preparing to unpack .../05-libbsd0_0.11.3-1+deb11u1_amd64.deb ...
+Unpacking libbsd0:amd64 (0.11.3-1+deb11u1) ...
+Selecting previously unselected package libedit2:amd64.
+Preparing to unpack .../06-libedit2_3.1-20191231-2+b1_amd64.deb ...
+Unpacking libedit2:amd64 (3.1-20191231-2+b1) ...
+Selecting previously unselected package libncurses6:amd64.
+Preparing to unpack .../07-libncurses6_6.2+20201114-2+deb11u2_amd64.deb ...
+Unpacking libncurses6:amd64 (6.2+20201114-2+deb11u2) ...
+Selecting previously unselected package mariadb-client-core-10.5.
+Preparing to unpack .../08-mariadb-client-core-10.5_1%3a10.5.26-0+deb11u2_amd64.deb ...
+Unpacking mariadb-client-core-10.5 (1:10.5.26-0+deb11u2) ...
+Selecting previously unselected package mariadb-client-10.5.
+Preparing to unpack .../09-mariadb-client-10.5_1%3a10.5.26-0+deb11u2_amd64.deb ...
+Unpacking mariadb-client-10.5 (1:10.5.26-0+deb11u2) ...
+Selecting previously unselected package default-mysql-client.
+Preparing to unpack .../10-default-mysql-client_1.0.7_all.deb ...
+Unpacking default-mysql-client (1.0.7) ...
+Selecting previously unselected package libdbi-perl:amd64.
+Preparing to unpack .../11-libdbi-perl_1.643-3+b1_amd64.deb ...
+Unpacking libdbi-perl:amd64 (1.643-3+b1) ...
+Selecting previously unselected package libdbd-mariadb-perl.
+Preparing to unpack .../12-libdbd-mariadb-perl_1.21-3_amd64.deb ...
+Unpacking libdbd-mariadb-perl (1.21-3) ...
+Selecting previously unselected package libgpm2:amd64.
+Preparing to unpack .../13-libgpm2_1.20.7-8_amd64.deb ...
+Unpacking libgpm2:amd64 (1.20.7-8) ...
+Selecting previously unselected package libterm-readkey-perl.
+Preparing to unpack .../14-libterm-readkey-perl_2.38-1+b2_amd64.deb ...
+Unpacking libterm-readkey-perl (2.38-1+b2) ...
+Setting up libconfig-inifiles-perl (3.000003-1) ...
+Setting up mysql-common (5.8+1.0.7) ...
+update-alternatives: using /etc/mysql/my.cnf.fallback to provide /etc/mysql/my.cnf (my.cnf) in auto mode
+Setting up libgpm2:amd64 (1.20.7-8) ...
+Setting up mariadb-common (1:10.5.26-0+deb11u2) ...
+update-alternatives: using /etc/mysql/mariadb.cnf to provide /etc/mysql/my.cnf (my.cnf) in auto mode
+Setting up libncurses6:amd64 (6.2+20201114-2+deb11u2) ...
+Setting up libmariadb3:amd64 (1:10.5.26-0+deb11u2) ...
+Setting up libmd0:amd64 (1.0.3-3) ...
+Setting up libterm-readkey-perl (2.38-1+b2) ...
+Setting up libbsd0:amd64 (0.11.3-1+deb11u1) ...
+Setting up libdbi-perl:amd64 (1.643-3+b1) ...
+Setting up libedit2:amd64 (3.1-20191231-2+b1) ...
+Setting up libdbd-mariadb-perl (1.21-3) ...
+Setting up mariadb-client-core-10.5 (1:10.5.26-0+deb11u2) ...
+Setting up mariadb-client-10.5 (1:10.5.26-0+deb11u2) ...
+Setting up default-mysql-client (1.0.7) ...
+Processing triggers for libc-bin (2.31-13+deb11u5) ...
+Configuring for:
+PHP Api Version:         20190902
+Zend Module Api No:      20190902
+Zend Extension Api No:   320190902
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking for a sed that does not truncate output... /bin/sed
+checking for pkg-config... /usr/bin/pkg-config
+checking pkg-config is at least version 0.9.0... yes
+checking for cc... cc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether cc accepts -g... yes
+checking for cc option to accept ISO C89... none needed
+checking how to run the C preprocessor... cc -E
+checking for icc... no
+checking for suncc... no
+checking for system library directory... lib
+checking if compiler supports -R... no
+checking if compiler supports -Wl,-rpath,... yes
+checking build system type... x86_64-pc-linux-gnu
+checking host system type... x86_64-pc-linux-gnu
+checking target system type... x86_64-pc-linux-gnu
+checking for PHP prefix... /usr/local
+checking for PHP includes... -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib
+checking for PHP extension directory... /usr/local/lib/php/extensions/no-debug-non-zts-20190902
+checking for PHP installed headers prefix... /usr/local/include/php
+checking if debug is enabled... no
+checking if zts is enabled... no
+checking for gawk... no
+checking for nawk... nawk
+checking if nawk is broken... no
+checking whether to enable PDO support... yes, shared
+checking for a sed that does not truncate output... /bin/sed
+checking for ld used by cc... /usr/bin/ld
+checking if the linker (/usr/bin/ld) is GNU ld... yes
+checking for /usr/bin/ld option to reload object files... -r
+checking for BSD-compatible nm... /usr/bin/nm -B
+checking whether ln -s works... yes
+checking how to recognize dependent libraries... pass_all
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking dlfcn.h usability... yes
+checking dlfcn.h presence... yes
+checking for dlfcn.h... yes
+checking the maximum length of command line arguments... 1572864
+checking command to parse /usr/bin/nm -B output from cc object... ok
+checking for objdir... .libs
+checking for ar... ar
+checking for ranlib... ranlib
+checking for strip... strip
+checking if cc supports -fno-rtti -fno-exceptions... no
+checking for cc option to produce PIC... -fPIC
+checking if cc PIC flag -fPIC works... yes
+checking if cc static flag -static works... yes
+checking if cc supports -c -o file.o... yes
+checking whether the cc linker (/usr/bin/ld -m elf_x86_64) supports shared libraries... yes
+checking whether -lc should be explicitly linked in... no
+checking dynamic linker characteristics... GNU/Linux ld.so
+checking how to hardcode library paths into programs... immediate
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... yes
+checking whether to build static libraries... no
+
+creating libtool
+appending configuration tag "CXX" to libtool
+configure: patching config.h.in
+configure: creating ./config.status
+config.status: creating config.h
+/bin/bash /usr/src/php/ext/pdo/libtool --mode=compile cc  -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo/pdo.c -o pdo.lo 
+mkdir .libs
+ cc -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo/pdo.c  -fPIC -DPIC -o .libs/pdo.o
+/bin/bash /usr/src/php/ext/pdo/libtool --mode=compile cc  -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo/pdo_dbh.c -o pdo_dbh.lo 
+ cc -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo/pdo_dbh.c  -fPIC -DPIC -o .libs/pdo_dbh.o
+/bin/bash /usr/src/php/ext/pdo/libtool --mode=compile cc  -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo/pdo_stmt.c -o pdo_stmt.lo 
+ cc -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo/pdo_stmt.c  -fPIC -DPIC -o .libs/pdo_stmt.o
+/bin/bash /usr/src/php/ext/pdo/libtool --mode=compile cc  -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo/pdo_sql_parser.c -o pdo_sql_parser.lo 
+ cc -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo/pdo_sql_parser.c  -fPIC -DPIC -o .libs/pdo_sql_parser.o
+/bin/bash /usr/src/php/ext/pdo/libtool --mode=compile cc  -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo/pdo_sqlstate.c -o pdo_sqlstate.lo 
+ cc -I. -I/usr/src/php/ext/pdo -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo/pdo_sqlstate.c  -fPIC -DPIC -o .libs/pdo_sqlstate.o
+/bin/bash /usr/src/php/ext/pdo/libtool --mode=link cc -DPHP_ATOM_INC -I/usr/src/php/ext/pdo/include -I/usr/src/php/ext/pdo/main -I/usr/src/php/ext/pdo -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64  -Wl,-O1 -pie  -o pdo.la -export-dynamic -avoid-version -prefer-pic -module -rpath /usr/src/php/ext/pdo/modules  pdo.lo pdo_dbh.lo pdo_stmt.lo pdo_sql_parser.lo pdo_sqlstate.lo 
+cc -shared  .libs/pdo.o .libs/pdo_dbh.o .libs/pdo_stmt.o .libs/pdo_sql_parser.o .libs/pdo_sqlstate.o   -Wl,-O1 -Wl,-soname -Wl,pdo.so -o .libs/pdo.so
+creating pdo.la
+(cd .libs && rm -f pdo.la && ln -s ../pdo.la pdo.la)
+/bin/bash /usr/src/php/ext/pdo/libtool --mode=install cp ./pdo.la /usr/src/php/ext/pdo/modules
+cp ./.libs/pdo.so /usr/src/php/ext/pdo/modules/pdo.so
+cp ./.libs/pdo.lai /usr/src/php/ext/pdo/modules/pdo.la
+PATH="$PATH:/sbin" ldconfig -n /usr/src/php/ext/pdo/modules
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /usr/src/php/ext/pdo/modules
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the `LD_RUN_PATH' environment variable
+     during linking
+   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+
+Build complete.
+Don't forget to run 'make test'.
+
++ strip --strip-all modules/pdo.so
+Installing shared extensions:     /usr/local/lib/php/extensions/no-debug-non-zts-20190902/
+Installing header files:          /usr/local/include/php/
+Installing PDO headers:           /usr/local/include/php/ext/pdo/
+
+warning: pdo (pdo.so) is already loaded!
+
+find . -name \*.gcno -o -name \*.gcda | xargs rm -f
+find . -name \*.lo -o -name \*.o | xargs rm -f
+find . -name \*.la -o -name \*.a | xargs rm -f
+find . -name \*.so | xargs rm -f
+find . -name .libs -a -type d|xargs rm -rf
+rm -f libphp.la      modules/* libs/*
+Configuring for:
+PHP Api Version:         20190902
+Zend Module Api No:      20190902
+Zend Extension Api No:   320190902
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking for a sed that does not truncate output... /bin/sed
+checking for pkg-config... /usr/bin/pkg-config
+checking pkg-config is at least version 0.9.0... yes
+checking for cc... cc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether cc accepts -g... yes
+checking for cc option to accept ISO C89... none needed
+checking how to run the C preprocessor... cc -E
+checking for icc... no
+checking for suncc... no
+checking for system library directory... lib
+checking if compiler supports -R... no
+checking if compiler supports -Wl,-rpath,... yes
+checking build system type... x86_64-pc-linux-gnu
+checking host system type... x86_64-pc-linux-gnu
+checking target system type... x86_64-pc-linux-gnu
+checking for PHP prefix... /usr/local
+checking for PHP includes... -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib
+checking for PHP extension directory... /usr/local/lib/php/extensions/no-debug-non-zts-20190902
+checking for PHP installed headers prefix... /usr/local/include/php
+checking if debug is enabled... no
+checking if zts is enabled... no
+checking for gawk... no
+checking for nawk... nawk
+checking if nawk is broken... no
+checking for MySQL support for PDO... yes, shared
+checking for the location of libz... no
+checking for MySQL UNIX socket location... 
+checking for PDO includes... /usr/local/include/php/ext
+checking for a sed that does not truncate output... /bin/sed
+checking for ld used by cc... /usr/bin/ld
+checking if the linker (/usr/bin/ld) is GNU ld... yes
+checking for /usr/bin/ld option to reload object files... -r
+checking for BSD-compatible nm... /usr/bin/nm -B
+checking whether ln -s works... yes
+checking how to recognize dependent libraries... pass_all
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking dlfcn.h usability... yes
+checking dlfcn.h presence... yes
+checking for dlfcn.h... yes
+checking the maximum length of command line arguments... 1572864
+checking command to parse /usr/bin/nm -B output from cc object... ok
+checking for objdir... .libs
+checking for ar... ar
+checking for ranlib... ranlib
+checking for strip... strip
+checking if cc supports -fno-rtti -fno-exceptions... no
+checking for cc option to produce PIC... -fPIC
+checking if cc PIC flag -fPIC works... yes
+checking if cc static flag -static works... yes
+checking if cc supports -c -o file.o... yes
+checking whether the cc linker (/usr/bin/ld -m elf_x86_64) supports shared libraries... yes
+checking whether -lc should be explicitly linked in... no
+checking dynamic linker characteristics... GNU/Linux ld.so
+checking how to hardcode library paths into programs... immediate
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... yes
+checking whether to build static libraries... no
+
+creating libtool
+appending configuration tag "CXX" to libtool
+configure: patching config.h.in
+configure: creating ./config.status
+config.status: creating config.h
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=compile cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo_mysql/pdo_mysql.c -o pdo_mysql.lo 
+mkdir .libs
+ cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo_mysql/pdo_mysql.c  -fPIC -DPIC -o .libs/pdo_mysql.o
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=compile cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo_mysql/mysql_driver.c -o mysql_driver.lo 
+ cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo_mysql/mysql_driver.c  -fPIC -DPIC -o .libs/mysql_driver.o
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=compile cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64   -c /usr/src/php/ext/pdo_mysql/mysql_statement.c -o mysql_statement.lo 
+ cc -I/usr/local/include/php/ext -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -I. -I/usr/src/php/ext/pdo_mysql -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -c /usr/src/php/ext/pdo_mysql/mysql_statement.c  -fPIC -DPIC -o .libs/mysql_statement.o
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=link cc -DPHP_ATOM_INC -I/usr/src/php/ext/pdo_mysql/include -I/usr/src/php/ext/pdo_mysql/main -I/usr/src/php/ext/pdo_mysql -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -I/usr/local/include/php/ext -I/usr/local/include/php/ext/date/lib  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CONFIG_H  -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64  -Wl,-O1 -pie  -o pdo_mysql.la -export-dynamic -avoid-version -prefer-pic -module -rpath /usr/src/php/ext/pdo_mysql/modules  pdo_mysql.lo mysql_driver.lo mysql_statement.lo 
+cc -shared  .libs/pdo_mysql.o .libs/mysql_driver.o .libs/mysql_statement.o   -Wl,-O1 -Wl,-soname -Wl,pdo_mysql.so -o .libs/pdo_mysql.so
+creating pdo_mysql.la
+(cd .libs && rm -f pdo_mysql.la && ln -s ../pdo_mysql.la pdo_mysql.la)
+/bin/bash /usr/src/php/ext/pdo_mysql/libtool --mode=install cp ./pdo_mysql.la /usr/src/php/ext/pdo_mysql/modules
+cp ./.libs/pdo_mysql.so /usr/src/php/ext/pdo_mysql/modules/pdo_mysql.so
+cp ./.libs/pdo_mysql.lai /usr/src/php/ext/pdo_mysql/modules/pdo_mysql.la
+PATH="$PATH:/sbin" ldconfig -n /usr/src/php/ext/pdo_mysql/modules
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /usr/src/php/ext/pdo_mysql/modules
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the `LD_RUN_PATH' environment variable
+     during linking
+   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+
+Build complete.
+Don't forget to run 'make test'.
+
++ strip --strip-all modules/pdo_mysql.so
+Installing shared extensions:     /usr/local/lib/php/extensions/no-debug-non-zts-20190902/
+find . -name \*.gcno -o -name \*.gcda | xargs rm -f
+find . -name \*.lo -o -name \*.o | xargs rm -f
+find . -name \*.la -o -name \*.a | xargs rm -f
+find . -name \*.so | xargs rm -f
+find . -name .libs -a -type d|xargs rm -rf
+rm -f libphp.la      modules/* libs/*
+Removing intermediate container 3f9a54798bd4
+ ---> d8dae0b62ac6
+Step 3/6 : WORKDIR /app
+ ---> Running in 0af75462c11b
+Removing intermediate container 0af75462c11b
+ ---> b3ab9cba4cff
+Step 4/6 : COPY . /app
+ ---> ed5041daf4dd
+Step 5/6 : EXPOSE 5000
+ ---> Running in 0b5eab1e04f2
+Removing intermediate container 0b5eab1e04f2
+ ---> 36924586e689
+Step 6/6 : CMD ["php", "-S", "0.0.0.0:5000", "app.php"]
+ ---> Running in 3229ad3b6bd7
+Removing intermediate container 3229ad3b6bd7
+ ---> 57f2f9f7a06b
+Successfully built 57f2f9f7a06b
+Successfully tagged php-demo9.4:latest
+controlplane $ docker login 
+Log in with your Docker ID or email address to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com/ to create one.
+You can log in with your password or a Personal Access Token (PAT). Using a limited-scope PAT grants better security and is required for organizations using SSO. Learn more at https://docs.docker.com/go/access-tokens/
+
+Username: anirudhadak2
+Password: 
+WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+controlplane $ docker tag php-demo9.4:latest anirudhadak2/test:php-demo9.4       
+controlplane $ docker push anirudhadak2/test:php-demo9.4 
+The push refers to repository [docker.io/anirudhadak2/test]
+055925f09249: Pushed 
+ad804e3e8e4b: Pushed 
+58e02b89449b: Pushed 
+d143ce802d49: Layer already exists 
+502fe165ca51: Layer already exists 
+c6f5e936b72e: Layer already exists 
+91fd2792fa74: Layer already exists 
+08cc615b0242: Layer already exists 
+44148371c697: Layer already exists 
+797a7c0590e0: Layer already exists 
+f60117696410: Layer already exists 
+ec4a38999118: Layer already exists 
+php-demo9.4: digest: sha256:41f6b4bab9a2c2a6f89237c720a01fdaf67b080f89b3374c8a2c86e68dd29c03 size: 2829
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates  updated-app.php
+controlplane $ cd ..
+controlplane $ ls
+Practical  Practical2  Problem-Statement  Problem-Statement2  app  k8s-php-yaml
+controlplane $ cd k8s-php-yaml
+controlplane $ ls
+mysql.yaml  php-deployment.yaml
+controlplane $ vi php-deployment.yaml
+controlplane $ kubectl get pod
+No resources found in default namespace.
+controlplane $ kubectl create -f mysql.yaml 
+deployment.apps/mysql-db created
+service/mysql-db created
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   0/1     ContainerCreating   0          7s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   0/1     ContainerCreating   0          10s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS    RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running   0          12s
+controlplane $ kubectl create -f php-deployment.yaml 
+deployment.apps/php-app created
+service/php-app created
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running             0          35s
+php-app-86b6bd6968-sfmv8   0/1     ContainerCreating   0          6s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running             0          36s
+php-app-86b6bd6968-sfmv8   0/1     ContainerCreating   0          7s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running             0          37s
+php-app-86b6bd6968-sfmv8   0/1     ContainerCreating   0          8s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running             0          38s
+php-app-86b6bd6968-sfmv8   0/1     ContainerCreating   0          9s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running             0          39s
+php-app-86b6bd6968-sfmv8   0/1     ContainerCreating   0          10s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running             0          39s
+php-app-86b6bd6968-sfmv8   0/1     ContainerCreating   0          10s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running             0          40s
+php-app-86b6bd6968-sfmv8   0/1     ContainerCreating   0          11s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS              RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running             0          41s
+php-app-86b6bd6968-sfmv8   0/1     ContainerCreating   0          12s
+controlplane $ kubectl get pod
+NAME                       READY   STATUS    RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running   0          43s
+php-app-86b6bd6968-sfmv8   1/1     Running   0          14s
+controlplane $ kubectl get svc
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP          18d
+mysql-db     ClusterIP   10.110.110.205   <none>        3306/TCP         55s
+php-app      NodePort    10.99.209.14     <none>        5000:30000/TCP   26s
+controlplane $ ls
+mysql.yaml  php-deployment.yaml
+controlplane $ ls
+mysql.yaml  php-deployment.yaml
+controlplane $ cd ..
+controlplane $ ls
+Practical  Practical2  Problem-Statement  Problem-Statement2  app  k8s-php-yaml
+controlplane $ cd app
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates  updated-app.php
+controlplane $ cd templages
+bash: cd: templages: No such file or directory
+controlplane $ cd templates
+controlplane $ ls
+login.php  register.php  user_home.php
+controlplane $ cd ..
+controlplane $ ls
+Dockerfile  app.php  directory-structure  scripts  templates  updated-app.php
+controlplane $ kubectl get pod 
+NAME                       READY   STATUS    RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running   0          4m18s
+php-app-86b6bd6968-sfmv8   1/1     Running   0          3m49s
+controlplane $ kubectl exec -it mysql-db-8f54f75f4-kgx5n
+error: you must specify at least one command for the container
+controlplane $ kubectl exec -it mysql-db-8f54f75f4-kgx5n -- bash 
+bash-4.2# ls
+bin   dev                         entrypoint.sh  home  lib64  mnt  proc  run   srv  tmp  var
+boot  docker-entrypoint-initdb.d  etc            lib   media  opt  root  sbin  sys  usr
+bash-4.2# pwd
+/
+bash-4.2# exit
+exit
+controlplane $ kubectl exec -it php-app-86b6bd6968-sfmv8 -- bash 
+root@php-app-86b6bd6968-sfmv8:/app# ls
+Dockerfile  app.php  directory-structure  master  scripts  templates  updated-app.php
+root@php-app-86b6bd6968-sfmv8:/app# cd master
+root@php-app-86b6bd6968-sfmv8:/app/master# ls
+amit  anirudha
+root@php-app-86b6bd6968-sfmv8:/app/master# cd amit
+root@php-app-86b6bd6968-sfmv8:/app/master/amit# ls
+sample_script.php
+root@php-app-86b6bd6968-sfmv8:/app/master/amit# pwd  
+/app/master/amit
+root@php-app-86b6bd6968-sfmv8:/app/master/amit# exit
+exit
+controlplane $ vi script1.py
+controlplane $ vi script2.py 
+controlplane $ vi script1.php
+controlplane $ vi script2.php
+controlplane $ ls
+Dockerfile  app.php  directory-structure  script1.php  script1.py  script2.php  script2.py  scripts  templates  updated-app.php
+controlplane $ kubectl get pod
+NAME                       READY   STATUS    RESTARTS   AGE
+mysql-db-8f54f75f4-kgx5n   1/1     Running   0          7m10s
+php-app-86b6bd6968-sfmv8   1/1     Running   0          6m41s
+controlplane $ kubectl cp script1.py script2.py  script1.php  script2.php php-app-86b6bd6968-sfmv8:/app/master/amit 
+error: source and destination are required
+controlplane $ ls
+Dockerfile  app.php  directory-structure  script1.php  script1.py  script2.php  script2.py  scripts  templates  updated-app.php
+controlplane $ kubectl cp script1.py  php-app-86b6bd6968-sfmv8:/app/master/amit 
+controlplane $ kubectl cp  script2.py   php-app-86b6bd6968-sfmv8:/app/master/amit 
+controlplane $ kubectl cp   script1.php   php-app-86b6bd6968-sfmv8:/app/master/amit 
+controlplane $ ls
+Dockerfile  app.php  directory-structure  script1.php  script1.py  script2.php  script2.py  scripts  templates  updated-app.php
+controlplane $ ls
+Dockerfile  app.php  directory-structure  script1.php  script1.py  script2.php  script2.py  scripts  templates  updated-app.php
+controlplane $ 
+
+
+
+======================================================================
+
+
+
+controlplane $ ls
+Dockerfile  app.php  directory-structure  script1.php  script1.py  script2.php  script2.py  scripts  templates  updated-app.php
+controlplane $ cat Dockerfile 
+# Step 1: Use an official PHP runtime as a base image
+FROM php:7.4-cli
+
+# Step 2: Install necessary extensions (PDO MySQL)
+RUN apt-get update && apt-get install -y \
+    default-mysql-client \
+    && docker-php-ext-install pdo pdo_mysql
+
+# Step 3: Set the working directory inside the container
+WORKDIR /app
+
+# Step 4: Copy the current directory contents into the container at /app
+COPY . /app
+
+# Step 5: Expose port 5000
+EXPOSE 5000
+
+# Step 6: Start PHP's built-in server
+CMD ["php", "-S", "0.0.0.0:5000", "app.php"]
+controlplane $ cat app.php
+<?php
+session_start();
+
+// Database configuration from environment variables
+$host = getenv('DB_HOST') ?: 'mysql-db';
+$dbname = getenv('DB_NAME') ?: 'users_db';
+$username_db = getenv('DB_USER') ?: 'root';
+$password_db = getenv('DB_PASSWORD') ?: 'rootpassword';
+
+// Connect to MySQL database
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username_db, $password_db);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Create the users table if it doesn't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    )");
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
+// Ensure master folder exists
+if (!is_dir('master')) {
+    mkdir('master', 0777, true);
+}
+
+// Redirect to the registration page if no session exists and accessing the root
+if (!isset($_SESSION['username'])) {
+    if ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/index.php') {
+        header("Location: /register");
+        exit();
+    }
+}
+
+// Handle registration
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+    // Check if username already exists
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        echo "<p>Username already taken. Try another.</p>";
+    } else {
+        // Insert new user into the database
+        $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        $stmt->execute([$username, $password]);
+
+        // Create user folder inside /master
+        $user_folder = "master/$username";
+        mkdir($user_folder);
+
+        // Copy sample script into the user's folder
+        copy("scripts/sample_script.php", "$user_folder/sample_script.php");
+
+        echo "<p>Registration successful. Please <a href='/login'>log in</a>.</p>";
+    }
+}
+
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Fetch user from database
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['username'] = $username;
+        header("Location: /user_home");
+        exit();
+    } else {
+        echo "<p>Invalid credentials. Please try again.</p>";
+    }
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: /register");
+    exit();
+}
+
+// Display registration and login forms by default if no session
+if (!isset($_SESSION['username'])) {
+    if ($_SERVER['REQUEST_URI'] === '/register') {
+        include('templates/register.php');
+        exit();
+    } elseif ($_SERVER['REQUEST_URI'] === '/login') {
+        include('templates/login.php');
+        exit();
+    }
+}
+
+// Display user home page if logged in
+if (isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/user_home') {
+    $username = $_SESSION['username'];
+    $user_folder = "master/$username";
+
+    // List PHP and Python scripts in the user's folder
+    $scripts = [];
+    if (is_dir($user_folder)) {
+        $scripts = array_filter(scandir($user_folder), function ($file) use ($user_folder) {
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+            return in_array($extension, ['php', 'py']) && is_file("$user_folder/$file");
+        });
+    }
+
+    // Display the user home template
+    include('templates/user_home.php');
+    exit();
+}
+?>
+
+
+
+-----------------------------------------------------------------------------------------
+============================================================
+
+
+login.php  register.php  user_home.php
+controlplane $ cat user_home.php 
+<?php
+session_start();
+if (!isset($_SESSION['username'])) {
+    header("Location: /login");
+    exit();
+}
+
+$username = $_SESSION['username'];
+$user_folder = "master/$username";
+
+// List PHP and Python scripts in the user's folder
+$scripts = [];
+if (is_dir($user_folder)) {
+    $scripts = array_filter(scandir($user_folder), function ($file) use ($user_folder) {
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
+        return ($extension === 'php' || $extension === 'py') && is_file("$user_folder/$file");
+    });
+}
+
+// Handle script execution on form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['run_script'])) {
+    $script_name = $_POST['script_name'];
+    $script_path = "$user_folder/$script_name";
+
+    if (file_exists($script_path)) {
+        $extension = pathinfo($script_path, PATHINFO_EXTENSION);
+
+        // Execute PHP script
+        if ($extension === 'php') {
+            ob_start();
+            include($script_path);
+            $output = ob_get_clean();
+            echo "<p>PHP Script Output:</p><pre>$output</pre>";
+
+        // Execute Python script
+        } elseif ($extension === 'py') {
+            $output = shell_exec("python3 $script_path");
+            echo "<p>Python Script Output:</p><pre>$output</pre>";
+        }
+    } else {
+        echo "<p>Script not found or access denied.</p>";
+    }
+}
+
+// Handle session reset
+if (isset($_POST['reset_session'])) {
+    session_destroy();
+    header("Location: /login");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home</title>
+</head>
+<body>
+    <h2>Welcome, <?php echo htmlspecialchars($username); ?></h2>
+
+    <h3>Your scripts:</h3>
+    <ul>
+        <?php foreach ($scripts as $script): ?>
+            <li>
+                <form method="POST">
+                    <input type="hidden" name="script_name" value="<?php echo htmlspecialchars($script); ?>">
+                    <button type="submit" name="run_script">Run <?php echo htmlspecialchars($script); ?></button>
+                </form>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+
+    <form method="POST" style="margin-top: 20px;">
+        <button type="submit" name="reset_session">Reset Session</button>
+    </form>
+
+    <a href="?logout" style="position: absolute; top: 10px; left: 10px;">Logout</a>
+</body>
+</html>
+controlplane $ ls 
+login.php  register.php  user_home.php
+controlplane $ cat register.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <form action="/register" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit" name="register">Register</button>
+    </form>
+    <br>
+    <p>Already have an account? <a href="/login">Login Here</a></p>
+</body>
+</html>
+controlplane $ cat login.php 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form action="/login" method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit" name="login">Login</button>
+    </form>
+    <br>
+    <p>New user? <a href="/register">Register Here</a></p>
+</body>
+</html>
+controlplane $ 
+
+
+
+=============================================================
+
+
+controlplane $ cat script1.php  script1.py  script2.php  script2.py 
+<?php
+// script1.php: Displays the current server date and time.
+echo "Current Date and Time: " . date("Y-m-d H:i:s");
+?>
+# script1.py: Generates a random number.
+import random
+print("Random Number:", random.randint(1, 100))
+
+<?php
+// script2.php: Displays a personalized greeting.
+session_start();
+if (isset($_SESSION['username'])) {
+    echo "Hello, " . htmlspecialchars($_SESSION['username']) . "! Welcome to your dashboard.";
+} else {
+    echo "Hello, Guest!";
+}
+?>
+# script2.py: Calculates the factorial of a number.
+def factorial(n):
+    if n == 0 or n == 1:
+        return 1
+    else:
+        return n * factorial(n - 1)
+
+num = 5  # Example number; can be modified to be user-input driven
+print(f"The factorial of {num} is {factorial(num)}")
+
+
+==================================================================
+
+
+Dockerfile  app.php  directory-structure  script1.php  script1.py  script2.php  script2.py  scripts  templates  updated-app.php
+controlplane $ ls
+Dockerfile  app.php  directory-structure  script1.php  script1.py  script2.php  script2.py  scripts  templates  updated-app.php
+controlplane $ cd ..
+controlplane $ ls
+Practical  Practical2  Problem-Statement  Problem-Statement2  app  k8s-php-yaml
+controlplane $ cd k8s-php-yaml
+controlplane $ ls
+mysql.yaml  php-deployment.yaml
+controlplane $ cat mysql.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "rootpassword"
+            - name: MYSQL_DATABASE
+              value: "users_db"
+          ports:
+            - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-db
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: mysql
+controlplane $ cat php-deployment.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php
+  template:
+    metadata:
+      labels:
+        app: php
+    spec:
+      containers:
+        - name: php-app
+          image:  anirudhadak2/test:php-demo9.4       # php-app:latest  # Update with your actual image
+          env:
+            - name: DB_HOST
+              value: "mysql-db"  # Use the MySQL service name
+            - name: DB_NAME
+              value: "users_db"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              value: "rootpassword"
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-app
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30000  # Choose a node port (between 30000-32767)
+  selector:
+    app: php
+controlplane $ 
+
+
+============================================================
+
+
+
+<?php
+session_start();
+
+// Database configuration from environment variables
+$host = getenv('DB_HOST') ?: 'mysql-db';
+$dbname = getenv('DB_NAME') ?: 'users_db';
+$username_db = getenv('DB_USER') ?: 'root';
+$password_db = getenv('DB_PASSWORD') ?: 'rootpassword';
+
+// Connect to MySQL database
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username_db, $password_db);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Create the users table if it doesn't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    )");
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
+// Ensure master folder exists
+if (!is_dir('master')) {
+    mkdir('master', 0777, true);
+}
+
+// Redirect to the registration page if no session exists and accessing the root
+if (!isset($_SESSION['username'])) {
+    if ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/index.php') {
+        header("Location: /register");
+        exit();
+    }
+}
+
+// Handle registration
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+    // Check if username already exists
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        echo "<p>Username already taken. Try another.</p>";
+    } else {
+        // Insert new user into the database
+        $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        $stmt->execute([$username, $password]);
+
+        // Create user folder inside /master
+        $user_folder = "master/$username";
+        mkdir($user_folder);
+
+        // Copy sample script into the user's folder
+        copy("scripts/sample_script.php", "$user_folder/sample_script.php");
+
+        echo "<p>Registration successful. Please <a href='/login'>log in</a>.</p>";
+    }
+}
+
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Fetch user from database
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['username'] = $username;
+        header("Location: /user_home");
+        exit();
+    } else {
+        echo "<p>Invalid credentials. Please try again.</p>";
+    }
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: /register");
+    exit();
+}
+
+// Display registration and login forms by default if no session
+if (!isset($_SESSION['username'])) {
+    if ($_SERVER['REQUEST_URI'] === '/register') {
+        include('templates/register.php');
+        exit();
+    } elseif ($_SERVER['REQUEST_URI'] === '/login') {
+        include('templates/login.php');
+        exit();
+    }
+}
+
+// Display user home page if logged in
+if (isset($_SESSION['username']) && $_SERVER['REQUEST_URI'] === '/user_home') {
+    $username = $_SESSION['username'];
+    $user_folder = "master/$username";
+
+    // List PHP and Python scripts in the user's folder
+    $scripts = [];
+    if (is_dir($user_folder)) {
+        $scripts = array_filter(scandir($user_folder), function ($file) use ($user_folder) {
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+            return in_array($extension, ['php', 'py']) && is_file("$user_folder/$file");
+        });
+    }
+
+    // Display the user home template
+    include('templates/user_home.php');
+    exit();
+}
+?>
+
+
+
+=====================================================================
